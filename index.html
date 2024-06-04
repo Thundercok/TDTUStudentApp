@@ -3,984 +3,451 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LịchCLB — TDTU</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>Lịch CLB — TDTU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #F5F4F0;
-  --surface: #FFFFFF;
-  --surface2: #F0EFE9;
-  --border: rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --text: #1A1917;
-  --text2: #6B6860;
-  --text3: #9B9A96;
-  --green: #1D9E75;
-  --green-bg: #E1F5EE;
-  --green-dark: #0F6E56;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
-
-  --c0: #378ADD; --c0b: #E6F1FB;
-  --c1: #D4537E; --c1b: #FBEAF0;
-  --c2: #BA7517; --c2b: #FAEEDA;
-  --c3: #639922; --c3b: #EAF3DE;
-  --c4: #7F77DD; --c4b: #EEEDFE;
-  --c5: #D85A30; --c5b: #FAECE7;
-  --c6: #1D9E75; --c6b: #E1F5EE;
-  --c7: #888780; --c7b: #F1EFE8;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#111110;--ink2:#6b6b68;--ink3:#b0afa9;
+  --paper:#fafaf8;--surf:#f4f3ee;--rule:#e8e7e2;--rule2:#d0cfc8;
+  --green:#2a6b4a;--green-bg:#f0f7f3;--green-bd:#c3ddd1;
+  --red:#9b2c2c;
+  --ff:'Instrument Serif',Georgia,serif;
+  --fm:'Geist Mono','Courier New',monospace;
 }
+html{font-size:13px;scroll-behavior:smooth}
+body{font-family:var(--fm);background:var(--paper);color:var(--ink);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Typography ── */
+.s{font-family:var(--ff)}
+.m{color:var(--ink2)}
+.f{color:var(--ink3)}
+.g{color:var(--green)}
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
-}
+/* ── Header ── */
+.hd{border-bottom:1px solid var(--rule);padding:0 40px;display:flex;align-items:baseline;gap:24px;height:52px}
+.wm{font-family:var(--ff);font-size:18px;letter-spacing:-.01em}
+.wm em{font-style:italic;color:var(--green)}
+.hr-line{flex:1;height:1px;background:var(--rule)}
+.hd-meta{font-size:10px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 
 /* ── Layout ── */
-.shell { display: flex; min-height: 100vh; }
+.shell{display:grid;grid-template-columns:272px 1fr;flex:1;min-height:0}
+.panel{border-right:1px solid var(--rule);display:flex;flex-direction:column;overflow-y:auto}
 
-.sidebar {
-  width: 300px;
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
+/* ── Panel blocks ── */
+.pb{padding:24px 24px 20px;border-bottom:1px solid var(--rule);animation:fu .3s ease both}
+.pb:nth-child(1){animation-delay:.05s}.pb:nth-child(2){animation-delay:.10s}
+.pb:nth-child(3){animation-delay:.15s}.pb:nth-child(4){animation-delay:.20s}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-.main {
-  flex: 1;
-  padding: 28px 32px;
-  overflow-x: auto;
-  min-width: 0;
-}
+.lbl{font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lbl::after{content:'';flex:1;height:1px;background:var(--rule)}
 
-/* ── Sidebar ── */
-.sidebar-header {
-  padding: 24px 20px 16px;
-  border-bottom: 1px solid var(--border);
-}
+/* ── Drop zone ── */
+.drop{border:1px dashed var(--rule2);padding:18px 14px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.drag{border-color:var(--green);background:var(--green-bg)}
+.drop-arr{display:block;font-size:18px;color:var(--ink3);margin-bottom:5px;transition:color .15s}
+.drop:hover .drop-arr{color:var(--green)}
+.drop p{font-size:11px;color:var(--ink2)}
+.drop span{font-size:10px;color:var(--ink3);display:block;margin-top:2px}
+#fi{display:none}
 
-.brand {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+.prev-wrap{display:none;margin-top:8px}
+.prev-wrap img{width:100%;height:68px;object-fit:cover;border:1px solid var(--rule);display:block}
+.prev-wrap p{font-size:10px;color:var(--ink3);text-align:center;margin-top:3px}
 
-.brand-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--green);
-}
+/* ── Inputs ── */
+.irow{display:flex;gap:5px;margin-top:9px}
+input.txt{flex:1;border:1px solid var(--rule2);background:var(--paper);font-family:var(--fm);font-size:12px;color:var(--ink);padding:7px 9px;outline:none;transition:border-color .15s;border-radius:0;-webkit-appearance:none}
+input.txt:focus{border-color:var(--green)}
+input.txt::placeholder{color:var(--ink3)}
+.btn{padding:7px 12px;background:var(--ink);color:var(--paper);border:none;font-family:var(--fm);font-size:11px;letter-spacing:.04em;cursor:pointer;white-space:nowrap;transition:background .15s;border-radius:0}
+.btn:hover{background:var(--green)}
+.btn:disabled{background:var(--ink3);cursor:default}
 
-.brand-sub {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 2px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: .02em;
-}
+/* ── Member list ── */
+.ml{display:flex;flex-direction:column;gap:1px}
+.mr{display:flex;align-items:center;gap:8px;padding:8px 8px;cursor:pointer;border:1px solid transparent;transition:border-color .12s,opacity .12s;user-select:none}
+.mr:hover{border-color:var(--rule)}
+.mr.dim{opacity:.3}
+.av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.mt_{flex:1;min-width:0}
+.mn{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms{font-size:10px;color:var(--ink3)}
+.sd{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sd.ok{background:var(--green)}.sd.busy{background:#c9960a;animation:bk 1s infinite}.sd.err{background:var(--red)}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+.bx{background:none;border:none;font-size:13px;color:var(--ink3);cursor:pointer;padding:0 2px;display:none;line-height:1}
+.mr:hover .bx{display:block}
+.bx:hover{color:var(--red)}
+.em-m{font-size:11px;color:var(--ink3);text-align:center;padding:14px 0}
 
-.sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
-.sidebar-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 10px;
-}
+/* ── Free block ── */
+.fb{background:var(--green-bg);border:1px solid var(--green-bd);padding:10px 12px}
+.ft{font-size:10px;color:var(--green);font-weight:500;margin-bottom:7px}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chip{font-size:10px;font-family:var(--fm);border:1px solid var(--green-bd);color:var(--green);padding:2px 6px;background:white}
 
-/* ── Upload zone ── */
-.upload-zone {
-  border: 1.5px dashed var(--border2);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-  background: var(--surface2);
-}
-.upload-zone:hover { border-color: var(--green); background: var(--green-bg); }
-.upload-zone.drag { border-color: var(--green); background: var(--green-bg); }
+/* ── Export ── */
+.erow{display:flex;gap:5px}
+.eg{flex:1;padding:7px 0;border:1px solid var(--rule2);background:none;font-family:var(--fm);font-size:10px;letter-spacing:.05em;color:var(--ink2);cursor:pointer;text-align:center;transition:border-color .15s,color .15s;border-radius:0}
+.eg:hover{border-color:var(--ink2);color:var(--ink)}
 
-.upload-icon {
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  background: var(--green-bg);
-  border: 1px solid rgba(29,158,117,.2);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 8px;
-  color: var(--green);
-  font-size: 16px;
-}
+/* ── Main content ── */
+.main{padding:36px 40px;overflow-x:auto;animation:fu .3s .1s ease both}
+.chead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:26px;gap:16px;flex-wrap:wrap}
+.ctitle{font-family:var(--ff);font-size:30px;letter-spacing:-.02em;line-height:1.05}
+.ctitle em{font-style:italic;color:var(--green)}
+.meta{display:flex;gap:18px;font-size:11px;color:var(--ink3);align-items:center;flex-wrap:wrap}
+.meta strong{color:var(--ink);font-weight:500}
 
-.upload-zone p { font-size: 12px; color: var(--text2); }
-.upload-zone strong { color: var(--text); font-weight: 500; }
-.upload-zone span { font-size: 10px; color: var(--text3); display: block; margin-top: 2px; }
-
-#fileInput { display: none; }
-
-/* ── Member name input ── */
-.name-input-row {
-  display: flex; gap: 6px; margin-top: 10px;
-}
-.name-input-row input {
-  flex: 1;
-  padding: 7px 10px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 13px;
-  background: var(--surface);
-  color: var(--text);
-  outline: none;
-  transition: border-color .15s;
-}
-.name-input-row input:focus { border-color: var(--green); }
-.name-input-row input::placeholder { color: var(--text3); }
-
-.btn-add {
-  padding: 7px 14px;
-  background: var(--green);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity .15s;
-}
-.btn-add:hover { opacity: .85; }
-.btn-add:disabled { opacity: .4; cursor: default; }
-
-/* ── Members list ── */
-.member-list { display: flex; flex-direction: column; gap: 6px; }
-
-.member-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  transition: all .15s;
-  user-select: none;
-}
-.member-item:hover { border-color: var(--border2); }
-.member-item.hidden { opacity: .35; }
-
-.member-avatar {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 600;
-  flex-shrink: 0;
-}
-
-.member-info { flex: 1; min-width: 0; }
-.member-name { font-weight: 500; font-size: 13px; }
-.member-meta { font-size: 11px; color: var(--text3); }
-
-.member-status {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-}
-.member-item.loading .member-status {
-  background: var(--c2);
-  animation: pulse 1s infinite;
-}
-.member-item.error .member-status { background: #E24B4A; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-.btn-remove {
-  background: none; border: none; cursor: pointer;
-  color: var(--text3); font-size: 14px; padding: 0 2px;
-  line-height: 1;
-  display: none;
-}
-.member-item:hover .btn-remove { display: block; }
-.btn-remove:hover { color: #E24B4A; }
-
-/* ── Free slots summary ── */
-.free-summary {
-  background: var(--green-bg);
-  border: 1px solid rgba(29,158,117,.2);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-}
-.free-summary-title {
-  font-size: 11px; font-weight: 600; color: var(--green-dark);
-  margin-bottom: 6px;
-}
-.free-slots-list { display: flex; flex-wrap: wrap; gap: 4px; }
-.free-chip {
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  background: white;
-  border: 1px solid rgba(29,158,117,.25);
-  color: var(--green-dark);
-  border-radius: 4px;
-  padding: 2px 6px;
-}
-
-/* ── Export button ── */
-.btn-export {
-  width: 100%;
-  padding: 9px;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-family: inherit;
-  font-size: 12px;
-  color: var(--text2);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  transition: all .15s;
-  margin-top: 6px;
-}
-.btn-export:hover { background: var(--surface2); color: var(--text); }
-
-/* ── Main area ── */
-.main-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.main-title { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; }
-.main-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
-
-/* ── Stats ── */
-.stats { display: flex; gap: 10px; flex-wrap: wrap; }
-.stat {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  min-width: 90px;
-}
-.stat-n { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
-.stat-l { font-size: 11px; color: var(--text3); margin-top: 1px; }
-
-/* ── Filter bar ── */
-.filter-bar {
-  display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
-}
-.filter-btn {
-  padding: 5px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border2);
-  background: var(--surface);
-  font-family: inherit;
-  font-size: 12px;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all .15s;
-}
-.filter-btn:hover { border-color: var(--green); color: var(--green); }
-.filter-btn.active { background: var(--green); border-color: var(--green); color: white; }
+/* ── Filter strip ── */
+.fstrip{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--rule)}
+.ft_{padding:6px 13px;font-family:var(--fm);font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:var(--ink3);cursor:pointer;transition:color .12s,border-color .12s;margin-bottom:-1px}
+.ft_:hover{color:var(--ink)}
+.ft_.on{color:var(--ink);border-bottom-color:var(--ink)}
+.ft_.fr.on{color:var(--green);border-bottom-color:var(--green)}
 
 /* ── Calendar ── */
-.cal-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
+.cal{border:1px solid var(--rule)}
+.cg{display:grid}
+.cc-corner{background:var(--surf);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:44px}
+.cc-day{background:var(--surf);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.cc-day:last-child{border-right:none}
+.dn{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+.db{font-size:9px;color:var(--green)}
+.ct{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:44px;display:flex;align-items:center;justify-content:flex-end;padding-right:9px;font-size:10px;color:var(--ink3)}
+.cc{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);height:44px;position:relative;transition:background .1s}
+.cc:last-child{border-right:none}
+.cc.fr{background:var(--green-bg)}
+.cc.fr::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--green-bd)}
+.blk{position:absolute;left:3px;right:3px;top:2px;border-left:2px solid;padding:3px 5px;overflow:hidden;cursor:default;z-index:2;transition:filter .12s}
+.blk:hover{filter:brightness(.91);z-index:9}
+.bn{font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bs{font-size:9px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.cal-grid {
-  display: grid;
-  grid-template-columns: 56px repeat(5, 1fr);
-}
-
-.cal-head {
-  display: contents;
-}
-
-.cal-head-corner {
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  padding: 10px;
-}
-
-.cal-head-day {
-  background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  padding: 10px 8px;
-  text-align: center;
-}
-.cal-head-day:last-child { border-right: none; }
-
-.cal-day-name {
-  font-size: 11px; font-weight: 600; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .06em;
-}
-.cal-day-date { font-size: 10px; color: var(--text3); margin-top: 1px; font-family: 'DM Mono', monospace; }
-
-.cal-body { display: contents; }
-
-.time-label {
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 8px;
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text3);
-  height: 48px;
-}
-
-.cal-cell {
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  height: 48px;
-  position: relative;
-  transition: background .1s;
-}
-.cal-cell:last-child { border-right: none; }
-.cal-cell.free-all { background: #F0FBF7; }
-.cal-cell.free-all::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-left: 2px solid rgba(29,158,117,.25);
-}
-
-/* ── Class blocks ── */
-.class-block {
-  position: absolute;
-  left: 3px; right: 3px;
-  border-radius: 5px;
-  padding: 3px 5px;
-  overflow: hidden;
-  cursor: pointer;
-  z-index: 2;
-  transition: filter .15s, transform .1s;
-}
-.class-block:hover { filter: brightness(.93); transform: scale(1.01); z-index: 10; }
-
-.block-subject {
-  font-size: 10px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.block-meta {
-  font-size: 9px; opacity: .75;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-family: 'DM Mono', monospace;
-}
-.block-member {
-  font-size: 9px; font-weight: 500;
-}
+/* ── Empty ── */
+.empty{padding:80px 0;text-align:center}
+.empty-big{font-family:var(--ff);font-size:20px;color:var(--ink3);font-style:italic;margin-bottom:5px}
+.empty-sm{font-size:11px;color:var(--ink3)}
 
 /* ── Tooltip ── */
-.tooltip {
-  position: fixed;
-  background: var(--text);
-  color: white;
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 1000;
-  max-width: 200px;
-  opacity: 0;
-  transition: opacity .15s;
-  line-height: 1.6;
-}
-.tooltip.show { opacity: 1; }
+.tip{position:fixed;background:var(--ink);color:var(--paper);font-family:var(--fm);font-size:11px;padding:8px 12px;pointer-events:none;z-index:9999;opacity:0;transition:opacity .12s;line-height:1.7;max-width:210px;white-space:pre-line}
+.tip.on{opacity:1}
 
-/* ── Empty state ── */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: var(--text3);
-  text-align: center;
-  gap: 8px;
-}
-.empty-icon { font-size: 36px; margin-bottom: 4px; }
-.empty-title { font-size: 15px; color: var(--text2); font-weight: 500; }
-.empty-sub { font-size: 13px; max-width: 300px; }
+/* ── Toasts ── */
+.tts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:5px;z-index:9999}
+.tt{background:var(--ink);color:var(--paper);font-family:var(--fm);font-size:11px;padding:8px 14px;animation:ti .18s ease;max-width:270px}
+.tt.ok{background:var(--green)}.tt.err{background:var(--red)}
+@keyframes ti{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── Toast ── */
-.toast-container {
-  position: fixed; bottom: 20px; right: 20px;
-  display: flex; flex-direction: column; gap: 8px;
-  z-index: 9999;
-}
-.toast {
-  background: var(--text);
-  color: white;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  animation: slideIn .2s ease;
-  display: flex; align-items: center; gap: 8px;
-  max-width: 300px;
-}
-.toast.success { background: var(--green-dark); }
-.toast.error { background: #A32D2D; }
-@keyframes slideIn { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+/* ── Footer ── */
+footer{border-top:1px solid var(--rule);padding:32px 40px 36px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:36px}
+.fw{font-family:var(--ff);font-size:15px;margin-bottom:6px}
+.fw em{font-style:italic;color:var(--green)}
+.fl{font-size:10px;color:var(--ink3);line-height:1.95}
+.fl strong{color:var(--ink2);font-weight:500}
+.fl a{color:var(--ink2);text-underline-offset:2px}
+.fl a:hover{color:var(--ink)}
+.fsec{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--rule2)}
 
-@media (max-width: 700px) {
-  .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
-  .shell { flex-direction: column; }
-  .main { padding: 16px; }
+@media(max-width:680px){
+  .shell{grid-template-columns:1fr}
+  .panel{border-right:none;border-bottom:1px solid var(--rule)}
+  .main{padding:24px 20px}
+  .hd{padding:0 20px}
+  footer{grid-template-columns:1fr;gap:20px;padding:24px 20px}
 }
 </style>
 </head>
 <body>
 
+<!-- Header -->
+<header class="hd">
+  <div class="wm">Lịch<em>CLB</em></div>
+  <div class="hr-line"></div>
+  <div class="hd-meta">TDTU · Tổng hợp thời khoá biểu</div>
+</header>
+
 <div class="shell">
+  <!-- Panel -->
+  <aside class="panel">
 
-  <!-- ── Sidebar ────────────────────────────────────── -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand">
-        <div class="brand-dot"></div>
-        LịchCLB
+    <div class="pb">
+      <div class="lbl">Thêm thành viên</div>
+      <div class="drop" id="dz">
+        <input type="file" id="fi" accept="image/*">
+        <span class="drop-arr">↑</span>
+        <p>Kéo thả hoặc bấm để chọn ảnh TKB</p>
+        <span>JPG · PNG · WebP · ảnh màn hình &amp; điện thoại</span>
       </div>
-      <div class="brand-sub">TDTU · Tổng hợp thời khoá biểu</div>
-    </div>
-
-    <!-- Upload -->
-    <div class="sidebar-section">
-      <div class="sidebar-label">Thêm thành viên</div>
-
-      <div class="upload-zone" id="uploadZone">
-        <input type="file" id="fileInput" accept="image/*" multiple>
-        <div class="upload-icon">↑</div>
-        <p><strong>Kéo thả ảnh TKB</strong> vào đây</p>
-        <p>hoặc bấm để chọn file</p>
-        <span>JPG, PNG, WebP · Ảnh chụp màn hình &amp; điện thoại</span>
+      <div class="prev-wrap" id="pw">
+        <img id="pi" alt="">
+        <p>Điền tên rồi bấm Thêm →</p>
       </div>
-
-      <div class="name-input-row">
-        <input type="text" id="memberName" placeholder="Tên thành viên..." maxlength="20">
-        <button class="btn-add" id="btnAdd" disabled>Thêm</button>
-      </div>
-
-      <div id="pendingImg" style="margin-top:8px;display:none">
-        <img id="previewImg" style="width:100%;border-radius:6px;border:1px solid var(--border);max-height:100px;object-fit:cover">
-        <p style="font-size:11px;color:var(--text3);margin-top:4px;text-align:center">Ảnh đã chọn · Điền tên rồi bấm Thêm</p>
+      <div class="irow">
+        <input class="txt" type="text" id="ni" placeholder="Tên thành viên…" maxlength="20">
+        <button class="btn" id="ba" disabled>Thêm</button>
       </div>
     </div>
 
-    <!-- Members -->
-    <div class="sidebar-section" style="flex:1">
-      <div class="sidebar-label">Thành viên (<span id="memberCount">0</span>)</div>
-      <div class="member-list" id="memberList">
-        <div style="font-size:12px;color:var(--text3);text-align:center;padding:12px 0">
-          Chưa có thành viên nào
-        </div>
+    <div class="pb" style="flex:1">
+      <div class="lbl">Thành viên <span class="f" id="mc">(0)</span></div>
+      <div class="ml" id="ml"><div class="em-m">Chưa có ai</div></div>
+    </div>
+
+    <div class="pb" id="fp" style="display:none">
+      <div class="lbl">Giờ rảnh chung</div>
+      <div class="fb">
+        <div class="ft">✓ Tất cả rảnh</div>
+        <div class="chips" id="fc"></div>
       </div>
     </div>
 
-    <!-- Free slots -->
-    <div class="sidebar-section" id="freeSlotsSection" style="display:none">
-      <div class="sidebar-label">Khung giờ tất cả rảnh</div>
-      <div class="free-summary">
-        <div class="free-summary-title">✓ Có thể họp CLB</div>
-        <div class="free-slots-list" id="freeSlotsList"></div>
+    <div class="pb">
+      <div class="lbl">Xuất lịch</div>
+      <div class="erow">
+        <button class="eg" onclick="expPNG()">↓ PNG</button>
+        <button class="eg" onclick="expPDF()">↓ PDF</button>
       </div>
     </div>
 
-    <!-- Export -->
-    <div class="sidebar-section">
-      <div class="sidebar-label">Xuất lịch</div>
-      <button class="btn-export" onclick="exportPNG()">
-        <span>↓</span> Xuất ảnh PNG
-      </button>
-      <button class="btn-export" onclick="exportPDF()">
-        <span>↓</span> Xuất PDF
-      </button>
-    </div>
   </aside>
 
-  <!-- ── Main ──────────────────────────────────────── -->
-  <main class="main" id="mainArea">
-    <div class="main-header">
-      <div>
-        <div class="main-title">Thời khoá biểu chung</div>
-        <div class="main-sub" id="mainSub">Thêm thành viên bên trái để bắt đầu</div>
-      </div>
-      <div class="stats" id="statsBar" style="display:none">
-        <div class="stat">
-          <div class="stat-n" id="statMembers">0</div>
-          <div class="stat-l">Thành viên</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n" id="statClasses">0</div>
-          <div class="stat-l">Môn học</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n" id="statFree">0</div>
-          <div class="stat-l">Giờ rảnh chung</div>
-        </div>
+  <!-- Main -->
+  <main class="main">
+    <div class="chead">
+      <div class="ctitle">Thời khoá biểu<br><em>chung</em></div>
+      <div class="meta" id="mr" style="display:none">
+        <span><strong id="sM">0</strong> thành viên</span>·
+        <span><strong id="sC">0</strong> môn</span>·
+        <span class="g"><strong id="sF">0</strong> giờ rảnh chung</span>
       </div>
     </div>
 
-    <!-- Filter -->
-    <div class="filter-bar" id="filterBar" style="display:none">
-      <button class="filter-btn active" data-day="all" onclick="setFilter('all', this)">Tất cả</button>
-      <button class="filter-btn" data-day="2" onclick="setFilter(2, this)">Thứ 2</button>
-      <button class="filter-btn" data-day="3" onclick="setFilter(3, this)">Thứ 3</button>
-      <button class="filter-btn" data-day="4" onclick="setFilter(4, this)">Thứ 4</button>
-      <button class="filter-btn" data-day="5" onclick="setFilter(5, this)">Thứ 5</button>
-      <button class="filter-btn" data-day="6" onclick="setFilter(6, this)">Thứ 6</button>
-      <button class="filter-btn" data-day="free" onclick="setFilter('free', this)">✓ Chỉ rảnh chung</button>
+    <div class="fstrip" id="fs" style="display:none">
+      <button class="ft_ on" onclick="setF('all',this)">Tất cả</button>
+      <button class="ft_"    onclick="setF(2,this)">Thứ 2</button>
+      <button class="ft_"    onclick="setF(3,this)">Thứ 3</button>
+      <button class="ft_"    onclick="setF(4,this)">Thứ 4</button>
+      <button class="ft_"    onclick="setF(5,this)">Thứ 5</button>
+      <button class="ft_"    onclick="setF(6,this)">Thứ 6</button>
+      <button class="ft_ fr" onclick="setF('free',this)">✓ Chỉ rảnh</button>
     </div>
 
-    <!-- Calendar -->
-    <div id="calContainer">
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <div class="empty-title">Chưa có lịch nào</div>
-        <div class="empty-sub">Upload ảnh thời khoá biểu của từng thành viên để tổng hợp lịch chung</div>
-      </div>
-    </div>
+    <div id="cw"></div>
   </main>
 </div>
 
-<!-- Tooltip -->
-<div class="tooltip" id="tooltip"></div>
+<!-- Footer -->
+<footer>
+  <div>
+    <div class="fw">Lịch<em>CLB</em></div>
+    <div class="fl">
+      Công cụ tổng hợp thời khoá biểu<br>
+      dành cho câu lạc bộ sinh viên TDTU.<br><br>
+      Tạo bởi <strong>Nigasaka Azumanga</strong><br>
+      © 2025 · Mọi quyền được bảo lưu.
+    </div>
+  </div>
+  <div>
+    <div class="fsec">Pháp lý &amp; Quyền riêng tư</div>
+    <div class="fl">
+      Công cụ chỉ phục vụ mục đích nội bộ,<br>
+      phi thương mại, miễn phí.<br><br>
+      Ảnh thời khoá biểu được xử lý bởi AI<br>
+      và <strong>không được lưu trữ</strong> sau phiên làm việc.<br><br>
+      Bằng việc sử dụng, bạn đồng ý dữ liệu<br>
+      chỉ dùng để tổng hợp lịch trong phiên này.<br><br>
+      Không thu thập · Không bán · Không chia sẻ<br>
+      dữ liệu với bên thứ ba.
+    </div>
+  </div>
+  <div>
+    <div class="fsec">Tuyên bố miễn trừ</div>
+    <div class="fl">
+      Kết quả đọc lịch từ AI có thể không<br>
+      chính xác 100%. Vui lòng kiểm tra lại.<br><br>
+      Phần mềm cung cấp "nguyên trạng"<br>
+      không kèm bảo hành bất kỳ.<br><br>
+      Trường Đại học Tôn Đức Thắng (TDTU)<br>
+      không liên quan và không chịu trách<br>
+      nhiệm về công cụ này.<br><br>
+      Mọi thương hiệu thuộc về chủ sở hữu.
+    </div>
+  </div>
+</footer>
 
-<!-- Toast container -->
-<div class="toast-container" id="toastContainer"></div>
+<div class="tip" id="tip"></div>
+<div class="tts" id="tts"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
-// ── State ─────────────────────────────────────────────────────────────────────
-const COLORS = [
-  {c:'#378ADD',bg:'#E6F1FB'},{c:'#D4537E',bg:'#FBEAF0'},{c:'#BA7517',bg:'#FAEEDA'},
-  {c:'#639922',bg:'#EAF3DE'},{c:'#7F77DD',bg:'#EEEDFE'},{c:'#D85A30',bg:'#FAECE7'},
-  {c:'#1D9E75',bg:'#E1F5EE'},{c:'#888780',bg:'#F1EFE8'}
+const PAL=[
+  {c:'#2a6b4a',bg:'#e8f5ee'},{c:'#2d5f8a',bg:'#e8f0f7'},
+  {c:'#7a3f6e',bg:'#f5eaf3'},{c:'#8a5a1a',bg:'#f7f0e0'},
+  {c:'#5a3d8a',bg:'#eeebf7'},{c:'#8a2d2d',bg:'#f7e8e8'},
+  {c:'#2d7a7a',bg:'#e8f5f5'},{c:'#6e6e2a',bg:'#f5f5e0'},
 ];
+const TT={1:'07:00',2:'07:50',3:'08:40',4:'09:40',5:'10:30',6:'11:20',7:'12:30',8:'13:20',9:'14:10',10:'15:10',11:'16:00',12:'16:50'};
+const DN=[{n:'Thứ 2'},{n:'Thứ 3'},{n:'Thứ 4'},{n:'Thứ 5'},{n:'Thứ 6'}];
+const DS={2:'T2',3:'T3',4:'T4',5:'T5',6:'T6'};
 
-const TIET_TIMES = {
-  1:'07:00',2:'07:50',3:'08:40',4:'09:40',5:'10:30',6:'11:20',
-  7:'12:30',8:'13:20',9:'14:10',10:'15:10',11:'16:00',12:'16:50'
-};
+let members=[],allCls=[],free=[],af='all',pf=null;
 
-const DAYS = [
-  {label:'Thứ 2', short:'T2'},
-  {label:'Thứ 3', short:'T3'},
-  {label:'Thứ 4', short:'T4'},
-  {label:'Thứ 5', short:'T5'},
-  {label:'Thứ 6', short:'T6'},
-];
+const dz=document.getElementById('dz'),fi=document.getElementById('fi');
+const ni=document.getElementById('ni'),ba=document.getElementById('ba');
+const pw=document.getElementById('pw'),pi=document.getElementById('pi');
+const ml=document.getElementById('ml'),mc=document.getElementById('mc');
+const fp=document.getElementById('fp'),fc=document.getElementById('fc');
+const cw=document.getElementById('cw'),fs=document.getElementById('fs');
+const mr=document.getElementById('mr'),tip=document.getElementById('tip');
+const tts=document.getElementById('tts');
 
-let members = [];      // {id, name, color, bg, classes:[], hidden:false}
-let allClasses = [];   // merged
-let freeSlots = [];
-let activeFilter = 'all';
-let pendingFile = null;
+dz.addEventListener('click',()=>fi.click());
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');if(e.dataTransfer.files[0])setF2(e.dataTransfer.files[0])});
+fi.addEventListener('change',()=>{if(fi.files[0])setF2(fi.files[0]);fi.value=''});
+ni.addEventListener('input',chk);
+ni.addEventListener('keydown',e=>{if(e.key==='Enter'&&!ba.disabled)add()});
+ba.addEventListener('click',add);
 
-// ── Upload handling ────────────────────────────────────────────────────────────
-const uploadZone = document.getElementById('uploadZone');
-const fileInput  = document.getElementById('fileInput');
-const memberName = document.getElementById('memberName');
-const btnAdd     = document.getElementById('btnAdd');
-const pendingDiv = document.getElementById('pendingImg');
-const previewImg = document.getElementById('previewImg');
+function setF2(f){pf=f;pi.src=URL.createObjectURL(f);pw.style.display='block';ni.focus();chk()}
+function chk(){ba.disabled=!(pf&&ni.value.trim())}
 
-uploadZone.addEventListener('click', () => fileInput.click());
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith('image/')) setFile(f);
-});
-
-fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) setFile(fileInput.files[0]);
-  fileInput.value = '';
-});
-
-memberName.addEventListener('input', checkReady);
-
-function setFile(f) {
-  pendingFile = f;
-  const url = URL.createObjectURL(f);
-  previewImg.src = url;
-  pendingDiv.style.display = 'block';
-  memberName.focus();
-  checkReady();
+async function add(){
+  const name=ni.value.trim();if(!name||!pf)return;
+  const ci=members.length%PAL.length;
+  const m={id:Date.now(),name,c:PAL[ci].c,bg:PAL[ci].bg,classes:[],hidden:false,status:'busy'};
+  members.push(m);
+  const file=pf;pf=null;pw.style.display='none';ni.value='';ba.disabled=true;
+  rml();toast('Đang đọc lịch của '+name+'…');
+  const b64=await toB64(file);
+  try{
+    const r=await fetch('/api/parse-schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,name})});
+    const d=await r.json();
+    if(d.success){m.classes=d.data;m.status='ok';toast('✓ '+d.data.length+' môn — '+name,'ok')}
+    else{m.status='err';toast('Lỗi: '+d.error,'err')}
+  }catch{m.status='err';toast('Lỗi kết nối','err')}
+  rml();merge();
 }
+function toB64(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)})}
 
-function checkReady() {
-  btnAdd.disabled = !(pendingFile && memberName.value.trim().length > 0);
-}
-
-// ── Add member ─────────────────────────────────────────────────────────────────
-btnAdd.addEventListener('click', addMember);
-memberName.addEventListener('keydown', e => { if (e.key === 'Enter' && !btnAdd.disabled) addMember(); });
-
-async function addMember() {
-  const name = memberName.value.trim();
-  if (!name || !pendingFile) return;
-
-  const colorIdx = members.length % COLORS.length;
-  const member = {
-    id: Date.now(),
-    name,
-    color: COLORS[colorIdx].c,
-    bg: COLORS[colorIdx].bg,
-    classes: [],
-    hidden: false,
-    status: 'loading'
-  };
-
-  members.push(member);
-  renderMemberList();
-  toast(`Đang đọc lịch của ${name}...`, 'info');
-
-  // Reset UI
-  const file = pendingFile;
-  pendingFile = null;
-  pendingDiv.style.display = 'none';
-  memberName.value = '';
-  btnAdd.disabled = true;
-
-  // Convert to base64
-  const b64 = await fileToB64(file);
-
-  try {
-    const res = await fetch('/api/parse-schedule', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ image: b64, name })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      member.classes = data.data;
-      member.status = 'ok';
-      toast(`✓ Đọc được ${data.data.length} môn của ${name}`, 'success');
-    } else {
-      member.status = 'error';
-      toast(`Lỗi đọc lịch ${name}: ${data.error}`, 'error');
-    }
-  } catch(e) {
-    member.status = 'error';
-    toast(`Lỗi kết nối khi đọc lịch ${name}`, 'error');
-  }
-
-  renderMemberList();
-  mergeAndRender();
-}
-
-function fileToB64(file) {
-  return new Promise(res => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.readAsDataURL(file);
-  });
-}
-
-// ── Render member list ─────────────────────────────────────────────────────────
-function renderMemberList() {
-  const list = document.getElementById('memberList');
-  document.getElementById('memberCount').textContent = members.length;
-
-  if (members.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px 0">Chưa có thành viên nào</div>';
-    return;
-  }
-
-  list.innerHTML = members.map(m => `
-    <div class="member-item ${m.hidden?'hidden':''} ${m.status}" 
-         onclick="toggleMember(${m.id})" title="Bấm để ẩn/hiện">
-      <div class="member-avatar" style="background:${m.bg};color:${m.color}">
-        ${m.name.charAt(0).toUpperCase()}
+function rml(){
+  mc.textContent='('+members.length+')';
+  if(!members.length){ml.innerHTML='<div class="em-m">Chưa có ai</div>';return}
+  ml.innerHTML=members.map(m=>`
+    <div class="mr ${m.hidden?'dim':''}" onclick="togM(${m.id})">
+      <div class="av" style="background:${m.bg};color:${m.c}">${m.name[0].toUpperCase()}</div>
+      <div class="mt_">
+        <div class="mn">${esc(m.name)}</div>
+        <div class="ms">${m.status==='busy'?'đang đọc…':m.status==='err'?'lỗi đọc lịch':m.classes.length+' môn'}</div>
       </div>
-      <div class="member-info">
-        <div class="member-name">${escHtml(m.name)}</div>
-        <div class="member-meta">
-          ${m.status==='loading' ? 'Đang đọc lịch...' :
-            m.status==='error'   ? 'Lỗi đọc lịch' :
-            m.classes.length + ' môn học'}
-        </div>
-      </div>
-      <div class="member-status"></div>
-      <button class="btn-remove" onclick="removeMember(event,${m.id})">×</button>
-    </div>
-  `).join('');
+      <div class="sd ${m.status==='ok'?'ok':m.status==='busy'?'busy':'err'}"></div>
+      <button class="bx" onclick="delM(event,${m.id})">×</button>
+    </div>`).join('');
+}
+function togM(id){const m=members.find(x=>x.id===id);if(m){m.hidden=!m.hidden;rml();merge()}}
+function delM(e,id){e.stopPropagation();members=members.filter(x=>x.id!==id);rml();merge()}
+
+async function merge(){
+  const vis=members.filter(m=>!m.hidden&&m.status==='ok');
+  if(!vis.length){allCls=[];free=[];render();return}
+  try{
+    const r=await fetch('/api/merge-schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedules:vis.map(m=>({name:m.name,classes:m.classes}))})});
+    const d=await r.json();
+    if(d.success){allCls=d.classes;free=d.free_slots}
+  }catch{
+    allCls=vis.flatMap(m=>m.classes);
+    const busy={};for(let d=2;d<=6;d++){busy[d]={};for(let t=1;t<=12;t++)busy[d][t]=0}
+    vis.forEach(m=>m.classes.forEach(c=>{for(let t=c.tiet_start;t<=c.tiet_end;t++)if(busy[c.day]&&busy[c.day][t]!==undefined)busy[c.day][t]++}));
+    free=[];for(let d=2;d<=6;d++)for(let t=1;t<=12;t++)if(busy[d][t]===0)free.push({day:d,tiet:t,time:TT[t]});
+  }
+  render();
 }
 
-function toggleMember(id) {
-  const m = members.find(x => x.id === id);
-  if (m) { m.hidden = !m.hidden; renderMemberList(); mergeAndRender(); }
-}
+function render(){
+  const vis=members.filter(m=>!m.hidden&&m.status==='ok');
+  const has=vis.length>0;
+  mr.style.display=has?'flex':'none';
+  fs.style.display=has?'flex':'none';
+  if(has){document.getElementById('sM').textContent=vis.length;document.getElementById('sC').textContent=allCls.length;document.getElementById('sF').textContent=free.length}
+  if(free.length&&vis.length){
+    fp.style.display='block';
+    fc.innerHTML=free.slice(0,14).map(s=>`<div class="chip">${DS[s.day]} ${s.time}</div>`).join('')+(free.length>14?`<div class="chip">+${free.length-14}</div>`:'');
+  }else fp.style.display='none';
 
-function removeMember(e, id) {
-  e.stopPropagation();
-  members = members.filter(x => x.id !== id);
-  renderMemberList();
-  mergeAndRender();
-}
+  if(!has){cw.innerHTML=`<div class="empty"><div class="empty-big">Chưa có lịch nào</div><div class="empty-sm">Upload ảnh thời khoá biểu của từng thành viên để bắt đầu</div></div>`;return}
 
-// ── Merge & render calendar ────────────────────────────────────────────────────
-async function mergeAndRender() {
-  const visible = members.filter(m => !m.hidden && m.status === 'ok');
-
-  if (visible.length === 0) {
-    allClasses = [];
-    freeSlots = [];
-    renderCalendar();
-    updateStats();
-    return;
-  }
-
-  try {
-    const res = await fetch('/api/merge-schedules', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ schedules: visible.map(m => ({name:m.name, classes:m.classes})) })
-    });
-    const data = await res.json();
-    if (data.success) {
-      allClasses = data.classes;
-      freeSlots = data.free_slots;
-    }
-  } catch(e) {
-    // Fallback: merge client-side
-    allClasses = visible.flatMap(m => m.classes);
-    freeSlots = computeFreeSlots(visible);
-  }
-
-  renderCalendar();
-  updateStats();
-  renderFreeSlots();
-}
-
-function computeFreeSlots(visible) {
-  const busy = {};
-  for (let d = 2; d <= 6; d++) {
-    busy[d] = {};
-    for (let t = 1; t <= 12; t++) busy[d][t] = 0;
-  }
-  visible.forEach(m => m.classes.forEach(cls => {
-    for (let t = cls.tiet_start; t <= cls.tiet_end; t++) {
-      if (busy[cls.day] && busy[cls.day][t] !== undefined) busy[cls.day][t]++;
-    }
-  }));
-  const free = [];
-  for (let d = 2; d <= 6; d++) {
-    for (let t = 1; t <= 12; t++) {
-      if (busy[d][t] === 0) free.push({day:d, tiet:t, time:TIET_TIMES[t]});
-    }
-  }
-  return free;
-}
-
-// ── Calendar render ────────────────────────────────────────────────────────────
-function renderCalendar() {
-  const container = document.getElementById('calContainer');
-
-  const visibleDays = activeFilter === 'all' || activeFilter === 'free'
-    ? [2,3,4,5,6]
-    : [parseInt(activeFilter)];
-
-  if (members.filter(m => !m.hidden && m.status==='ok').length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <div class="empty-title">Chưa có lịch nào</div>
-        <div class="empty-sub">Upload ảnh thời khoá biểu của từng thành viên để tổng hợp lịch chung</div>
-      </div>`;
-    document.getElementById('filterBar').style.display = 'none';
-    document.getElementById('statsBar').style.display = 'none';
-    document.getElementById('mainSub').textContent = 'Thêm thành viên bên trái để bắt đầu';
-    return;
-  }
-
-  document.getElementById('filterBar').style.display = 'flex';
-  document.getElementById('statsBar').style.display = 'flex';
-  document.getElementById('mainSub').textContent = `Tuần hiện tại · ${members.filter(m=>!m.hidden&&m.status==='ok').length} thành viên`;
-
-  const cols = visibleDays.length;
-  const gridCols = `56px repeat(${cols}, 1fr)`;
-
-  let html = `<div class="cal-wrap" id="calGrid">
-    <div class="cal-grid" style="grid-template-columns:${gridCols}">
-      <div class="cal-head-corner"></div>`;
-
-  visibleDays.forEach(d => {
-    const day = DAYS[d-2];
-    const hasFree = freeSlots.some(s => s.day === d);
-    html += `<div class="cal-head-day">
-      <div class="cal-day-name">${day.label}</div>
-      ${hasFree ? '<div class="cal-day-date" style="color:var(--green)">● rảnh</div>' : '<div class="cal-day-date">—</div>'}
-    </div>`;
+  const days=(af==='all'||af==='free')?[2,3,4,5,6]:[parseInt(af)];
+  const cols=days.length;
+  let h=`<div class="cal"><div class="cg" style="grid-template-columns:48px repeat(${cols},1fr)">`;
+  h+=`<div class="cc-corner"></div>`;
+  days.forEach(d=>{
+    const hf=free.some(s=>s.day===d);
+    h+=`<div class="cc-day"><div class="dn">${DN[d-2].n}</div>${hf?`<div class="db">● rảnh</div>`:''}</div>`;
   });
-
-  for (let tiet = 1; tiet <= 12; tiet++) {
-    html += `<div class="time-label">${TIET_TIMES[tiet]}</div>`;
-
-    visibleDays.forEach(d => {
-      const isFree = freeSlots.some(s => s.day === d && s.tiet === tiet);
-      const showFree = isFree && (activeFilter === 'all' || activeFilter === 'free');
-      html += `<div class="cal-cell${showFree?' free-all':''}" data-day="${d}" data-tiet="${tiet}">`;
-
-      // Find blocks starting at this tiet
-      const blocks = getBlocksAt(d, tiet);
-      const blockW = blocks.length > 0 ? Math.floor(100 / blocks.length) : 100;
-
-      blocks.forEach((b, bi) => {
-        const member = members.find(m => m.name === b.member);
-        if (!member) return;
-        const height = (b.tiet_end - b.tiet_start + 1) * 48;
-        const top = 2;
-        const left = bi * blockW + 1;
-        const width = blockW - 2;
-        html += `<div class="class-block"
-          style="top:${top}px;height:${height-4}px;left:${left}%;width:${width}%;background:${member.bg};border-left:3px solid ${member.color};color:${member.color}"
-          onmouseenter="showTip(event,this,'${escHtml(b.subject)}','${escHtml(b.member)}','${b.room||''}','${b.time_start||''}','${b.time_end||''}')"
-          onmouseleave="hideTip()">
-          <div class="block-member">${escHtml(member.name.charAt(0))}</div>
-          <div class="block-subject">${escHtml(b.subject)}</div>
-          ${b.room ? `<div class="block-meta">${escHtml(b.room)}</div>` : ''}
+  for(let t=1;t<=12;t++){
+    h+=`<div class="ct">${TT[t]}</div>`;
+    days.forEach(d=>{
+      const isFr=free.some(s=>s.day===d&&s.tiet===t);
+      const showFr=isFr&&(af==='all'||af==='free');
+      h+=`<div class="cc${showFr?' fr':''}" data-d="${d}" data-t="${t}">`;
+      const starts=allCls.filter(c=>c.day===d&&c.tiet_start===t);
+      const w=starts.length?100/starts.length:100;
+      starts.forEach((cls,bi)=>{
+        const mem=members.find(m=>m.name===cls.member);if(!mem)return;
+        const hp=(cls.tiet_end-cls.tiet_start+1)*44-4;
+        h+=`<div class="blk" style="top:2px;height:${hp}px;left:${(bi*w).toFixed(1)}%;width:${(w-1).toFixed(1)}%;background:${mem.bg};border-left-color:${mem.c};color:${mem.c}"
+          onmouseenter="sT(event,'${esc(cls.subject)}','${esc(mem.name)}','${cls.room||''}','${cls.time_start||TT[t]}','${cls.time_end||''}')"
+          onmouseleave="tip.classList.remove('on')">
+          <div class="bn">${esc(cls.subject)}</div>
+          <div class="bs">${esc(mem.name)}${cls.room?' · '+esc(cls.room):''}</div>
         </div>`;
       });
-
-      html += `</div>`;
+      h+=`</div>`;
     });
   }
-
-  html += `</div></div>`;
-  container.innerHTML = html;
+  h+=`</div></div>`;
+  cw.innerHTML=h;
 }
 
-function getBlocksAt(day, tiet) {
-  return allClasses.filter(c => c.day === day && c.tiet_start === tiet);
+function setF(v,btn){af=v;document.querySelectorAll('.ft_').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render()}
+
+function sT(e,subj,name,room,ts,te){tip.textContent=`${subj}\n${name}${room?'\n'+room:''}\n${ts}${te?' – '+te:''}`;tip.classList.add('on')}
+document.addEventListener('mousemove',e=>{tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-8)+'px'});
+
+function toast(msg,type=''){const t=document.createElement('div');t.className=`tt ${type}`;t.textContent=msg;tts.appendChild(t);setTimeout(()=>t.remove(),3200)}
+
+async function expPNG(){
+  const el=document.querySelector('.cal');if(!el){toast('Chưa có lịch','err');return}
+  toast('Đang xuất…');
+  const c=await html2canvas(el,{scale:2,backgroundColor:'#fafaf8'});
+  const a=document.createElement('a');a.href=c.toDataURL();a.download='lich-clb.png';a.click();
+  toast('✓ Đã xuất PNG','ok');
+}
+async function expPDF(){
+  const el=document.querySelector('.cal');if(!el){toast('Chưa có lịch','err');return}
+  toast('Đang xuất PDF…');
+  const{jsPDF}=window.jspdf;
+  const c=await html2canvas(el,{scale:2,backgroundColor:'#fafaf8'});
+  const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const w=pdf.internal.pageSize.getWidth();
+  pdf.addImage(c.toDataURL(),'PNG',0,0,w,(c.height/c.width)*w);
+  pdf.save('lich-clb.pdf');
+  toast('✓ Đã xuất PDF','ok');
 }
 
-// ── Stats ──────────────────────────────────────────────────────────────────────
-function updateStats() {
-  const vis = members.filter(m => !m.hidden && m.status === 'ok');
-  document.getElementById('statMembers').textContent = vis.length;
-  document.getElementById('statClasses').textContent = allClasses.length;
-  document.getElementById('statFree').textContent = freeSlots.length;
-}
-
-// ── Free slots sidebar ─────────────────────────────────────────────────────────
-function renderFreeSlots() {
-  const sec = document.getElementById('freeSlotsSection');
-  const lst = document.getElementById('freeSlotsList');
-  if (freeSlots.length === 0) { sec.style.display = 'none'; return; }
-  sec.style.display = 'block';
-
-  const DAY_NAMES = {2:'T2',3:'T3',4:'T4',5:'T5',6:'T6'};
-  lst.innerHTML = freeSlots.slice(0, 12).map(s =>
-    `<div class="free-chip">${DAY_NAMES[s.day]} ${s.time}</div>`
-  ).join('') + (freeSlots.length > 12 ? `<div class="free-chip">+${freeSlots.length-12}</div>` : '');
-}
-
-// ── Filter ─────────────────────────────────────────────────────────────────────
-function setFilter(val, btn) {
-  activeFilter = val;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderCalendar();
-}
-
-// ── Tooltip ────────────────────────────────────────────────────────────────────
-const tip = document.getElementById('tooltip');
-function showTip(e, el, subject, member, room, ts, te) {
-  tip.innerHTML = `<b>${subject}</b><br>${member}${room?'<br>Phòng: '+room:''}<br>${ts}–${te}`;
-  tip.style.left = (e.clientX + 12) + 'px';
-  tip.style.top  = (e.clientY - 10) + 'px';
-  tip.classList.add('show');
-}
-function hideTip() { tip.classList.remove('show'); }
-document.addEventListener('mousemove', e => {
-  tip.style.left = (e.clientX + 12) + 'px';
-  tip.style.top  = (e.clientY - 10) + 'px';
-});
-
-// ── Toast ──────────────────────────────────────────────────────────────────────
-function toast(msg, type='info') {
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(() => t.remove(), 3500);
-}
-
-// ── Export ─────────────────────────────────────────────────────────────────────
-async function exportPNG() {
-  const el = document.getElementById('calGrid');
-  if (!el) { toast('Chưa có lịch để xuất', 'error'); return; }
-  toast('Đang xuất ảnh...', 'info');
-  const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff'});
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download = 'lich-clb-tdtu.png';
-  a.click();
-  toast('✓ Đã xuất ảnh PNG', 'success');
-}
-
-async function exportPDF() {
-  const el = document.getElementById('calGrid');
-  if (!el) { toast('Chưa có lịch để xuất', 'error'); return; }
-  toast('Đang xuất PDF...', 'info');
-  const { jsPDF } = window.jspdf;
-  const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff'});
-  const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
-  const w = pdf.internal.pageSize.getWidth();
-  const h = (canvas.height / canvas.width) * w;
-  pdf.addImage(imgData, 'PNG', 0, 0, w, h);
-  pdf.save('lich-clb-tdtu.pdf');
-  toast('✓ Đã xuất PDF', 'success');
-}
-
-// ── Utils ──────────────────────────────────────────────────────────────────────
-function escHtml(str) {
-  if (!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 </script>
 </body>
 </html>
