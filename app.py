@@ -27,7 +27,7 @@ Hãy phân tích ảnh thời khoá biểu và trả về JSON với format CHÍ
       "tiet_end": 3,
       "weeks": "1-15"
     }
-  ]
+  ]`
 }
 
 Quy tắc:
