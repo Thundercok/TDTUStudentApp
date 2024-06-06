@@ -1,5 +1,5 @@
 import os, json, base64, re
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 from dotenv import load_dotenv
 import anthropic
 
@@ -27,7 +27,7 @@ Hãy phân tích ảnh thời khoá biểu và trả về JSON với format CHÍ
       "tiet_end": 3,
       "weeks": "1-15"
     }
-  ]`
+  ]
 }
 
 Quy tắc:
@@ -142,6 +142,64 @@ def merge_schedules():
         "free_slots": free_slots,
         "members": member_names
     })
+
+
+@app.route("/sw.js")
+def service_worker():
+    sw = """
+const CACHE = 'lichclb-v1';
+const ASSETS = ['/', '/static/manifest.json'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  // Always go network-first for API calls
+  if (url.pathname.startsWith('/api/')) {
+    e.respondWith(fetch(e.request).catch(() =>
+      new Response(JSON.stringify({error:'Không có mạng. Vui lòng kết nối internet để đọc lịch.'}),
+        {headers:{'Content-Type':'application/json'}})
+    ));
+    return;
+  }
+  // Cache-first for everything else (UI shell)
+  e.respondWith(
+    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return res;
+    }))
+  );
+});
+"""
+    return Response(sw, mimetype='application/javascript',
+                    headers={'Service-Worker-Allowed': '/'})
+
+
+@app.route("/static/manifest.json")
+def manifest():
+    data = {
+        "name": "Lịch CLB TDTU",
+        "short_name": "LịchCLB",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#fafaf8",
+        "theme_color": "#2a6b4a",
+        "icons": []
+    }
+    return jsonify(data)
 
 
 if __name__ == "__main__":

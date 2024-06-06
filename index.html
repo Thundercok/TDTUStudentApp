@@ -3,18 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2a6b4a">
 <title>Lịch CLB — TDTU</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="/static/manifest.json">
 <style>
+@font-face {
+  font-family: 'SysSerif';
+  src: local('Palatino Linotype'), local('Palatino'), local('Book Antiqua'),
+       local('Georgia'), local('Times New Roman');
+  font-style: normal;
+}
+@font-face {
+  font-family: 'SysSerif';
+  src: local('Palatino Linotype'), local('Palatino'), local('Book Antiqua'),
+       local('Georgia'), local('Times New Roman');
+  font-style: italic;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --ink:#111110;--ink2:#6b6b68;--ink3:#b0afa9;
   --paper:#fafaf8;--surf:#f4f3ee;--rule:#e8e7e2;--rule2:#d0cfc8;
   --green:#2a6b4a;--green-bg:#f0f7f3;--green-bd:#c3ddd1;
   --red:#9b2c2c;
-  --ff:'Instrument Serif',Georgia,serif;
-  --fm:'Geist Mono','Courier New',monospace;
+  --ff:'Palatino Linotype','Palatino','Book Antiqua','Georgia',serif;
+  --fm:ui-monospace,'Cascadia Code','SF Mono','Menlo','Consolas','Liberation Mono',monospace;
   --panel-w:272px;
   --hdr-h:52px;
   --mob-nav-h:56px;
@@ -768,10 +780,13 @@ function esc(s){
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// ── Resize handler — close drawer on resize to desktop ─────────────────────
-window.addEventListener('resize',()=>{
-  if(!isMobile())closeDrawer();
-});
+// ── Service Worker registration ────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+if(!isMobile())closeDrawer();
 </script>
 </body>
 </html>
