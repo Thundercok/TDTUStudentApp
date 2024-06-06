@@ -439,6 +439,10 @@ footer{
       </div>
     </div>
 
+    <div class="pb" style="padding:14px 22px">
+      <div id="storageBar" style="font-size:10px;font-family:var(--fm);line-height:1.8"></div>
+    </div>
+
   </aside>
 
   <!-- ── Main ───────────────────────────────────────────── -->
@@ -484,9 +488,9 @@ footer{
       Công cụ chỉ phục vụ mục đích nội bộ,<br>
       phi thương mại, miễn phí.<br><br>
       Ảnh thời khoá biểu được xử lý bởi AI<br>
-      và <strong>không được lưu trữ</strong> sau phiên làm việc.<br><br>
-      Bằng việc sử dụng, bạn đồng ý dữ liệu<br>
-      chỉ dùng để tổng hợp lịch trong phiên này.<br><br>
+      và <strong>không gửi lên server</strong> sau khi đọc xong.<br><br>
+      Dữ liệu lịch được lưu <strong>trên máy của bạn</strong><br>
+      (localStorage) và không rời khỏi thiết bị.<br><br>
       Không thu thập · Không bán · Không chia sẻ<br>
       dữ liệu với bên thứ ba.
     </div>
@@ -538,9 +542,55 @@ const PAL=[
 const TT={1:'07:00',2:'07:50',3:'08:40',4:'09:40',5:'10:30',6:'11:20',7:'12:30',8:'13:20',9:'14:10',10:'15:10',11:'16:00',12:'16:50'};
 const DN=[{n:'Thứ 2',s:'T2'},{n:'Thứ 3',s:'T3'},{n:'Thứ 4',s:'T4'},{n:'Thứ 5',s:'T5'},{n:'Thứ 6',s:'T6'}];
 const DS={2:'T2',3:'T3',4:'T4',5:'T5',6:'T6'};
+const LS_KEY='lichclb_v1';
 
 // ── State ──────────────────────────────────────────────────────────────────
 let members=[],allCls=[],free=[],af='all',pf=null;
+
+// ── Persistence ────────────────────────────────────────────────────────────
+function save(){
+  try{
+    const data=members
+      .filter(m=>m.status==='ok')
+      .map(m=>({id:m.id,name:m.name,c:m.c,bg:m.bg,classes:m.classes,hidden:m.hidden,savedAt:m.savedAt||Date.now()}));
+    localStorage.setItem(LS_KEY,JSON.stringify(data));
+    renderStorageBar();
+  }catch(e){ console.warn('localStorage save failed:',e); }
+}
+
+function load(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return;
+    const data=JSON.parse(raw);
+    if(!Array.isArray(data)||!data.length)return;
+    members=data.map(m=>({...m,status:'ok'}));
+    rml(); merge();
+    toast('Đã tải lịch đã lưu: '+members.map(m=>m.name).join(', '),'ok');
+  }catch(e){ console.warn('localStorage load failed:',e); }
+}
+
+function clearAll(){
+  if(!confirm('Xoá toàn bộ lịch đã lưu?'))return;
+  localStorage.removeItem(LS_KEY);
+  members=[];allCls=[];free=[];
+  rml();render();renderStorageBar();
+  toast('Đã xoá toàn bộ dữ liệu');
+}
+
+// Storage info bar — how much space used
+function renderStorageBar(){
+  const bar=document.getElementById('storageBar');
+  if(!bar)return;
+  try{
+    const raw=localStorage.getItem(LS_KEY)||'[]';
+    const kb=(new Blob([raw]).size/1024).toFixed(1);
+    const count=members.filter(m=>m.status==='ok').length;
+    bar.innerHTML=count>0
+      ? `<span style="color:var(--green)">● ${count} lịch đã lưu</span> <span style="color:var(--ink3)">· ${kb} KB</span> <button onclick="clearAll()" style="background:none;border:none;font-family:var(--fm);font-size:10px;color:var(--ink3);cursor:pointer;padding:0 0 0 8px;text-decoration:underline;text-underline-offset:2px">Xoá tất cả</button>`
+      : `<span style="color:var(--ink3)">Chưa có dữ liệu lưu</span>`;
+  }catch{ bar.innerHTML=''; }
+}
 
 // ── DOM ────────────────────────────────────────────────────────────────────
 const dz=document.getElementById('dz'),fi=document.getElementById('fi');
@@ -622,10 +672,10 @@ async function add(){
   try{
     const r=await fetch('/api/parse-schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:b64,name})});
     const d=await r.json();
-    if(d.success){m.classes=d.data;m.status='ok';toast('✓ '+d.data.length+' môn — '+name,'ok')}
+    if(d.success){m.classes=d.data;m.status='ok';m.savedAt=Date.now();toast('✓ '+d.data.length+' môn — '+name,'ok')}
     else{m.status='err';toast('Lỗi: '+d.error,'err')}
   }catch{m.status='err';toast('Lỗi kết nối','err')}
-  rml();merge();
+  rml();merge();save();
 }
 function toB64(f){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(f)})}
 
@@ -635,19 +685,22 @@ function rml(){
   // update drawer toggle label
   document.getElementById('drawerToggle').textContent='☰ '+members.length+' thành viên';
   if(!members.length){ml.innerHTML='<div class="em-m">Chưa có ai</div>';return}
-  ml.innerHTML=members.map(m=>`
+  ml.innerHTML=members.map(m=>{
+    const saved=m.savedAt?`<span style="font-size:9px;color:var(--green);margin-left:2px" title="Đã lưu lúc ${new Date(m.savedAt).toLocaleString('vi-VN')}">✓ đã lưu</span>`:'';
+    return `
     <div class="mr_ ${m.hidden?'dim':''}" onclick="togM(${m.id})">
       <div class="av" style="background:${m.bg};color:${m.c}">${m.name[0].toUpperCase()}</div>
       <div class="mt_">
-        <div class="mn">${esc(m.name)}</div>
+        <div class="mn">${esc(m.name)}${saved}</div>
         <div class="ms">${m.status==='busy'?'đang đọc…':m.status==='err'?'lỗi đọc lịch':m.classes.length+' môn'}</div>
       </div>
       <div class="sd ${m.status==='ok'?'ok':m.status==='busy'?'busy':'err'}"></div>
       <button class="bx" onclick="delM(event,${m.id})">×</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
-function togM(id){const m=members.find(x=>x.id===id);if(m){m.hidden=!m.hidden;rml();merge()}}
-function delM(e,id){e.stopPropagation();members=members.filter(x=>x.id!==id);rml();merge()}
+function togM(id){const m=members.find(x=>x.id===id);if(m){m.hidden=!m.hidden;rml();merge();save();}}
+function delM(e,id){e.stopPropagation();members=members.filter(x=>x.id!==id);rml();merge();save();}
 
 // ── Merge ──────────────────────────────────────────────────────────────────
 async function merge(){
@@ -786,7 +839,15 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
-if(!isMobile())closeDrawer();
+
+// ── Resize handler ─────────────────────────────────────────────────────────
+window.addEventListener('resize',()=>{
+  if(!isMobile())closeDrawer();
+});
+
+// ── Boot: load saved data ──────────────────────────────────────────────────
+renderStorageBar();
+load();
 </script>
 </body>
 </html>
