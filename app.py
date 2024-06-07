@@ -5,7 +5,12 @@ import google.generativeai as genai
 
 load_dotenv()
 app = Flask(__name__)
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+if not api_key:
+    raise RuntimeError(
+        "No Gemini API key found. Set GEMINI_API_KEY or GOOGLE_API_KEY in environment or .env file."
+    )
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 TIET_MAP = {
