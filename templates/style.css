@@ -1,0 +1,916 @@
+/* ════════════════════════════════════════════════════════════
+   style.css  —  LịchCLB
+   Sections:
+     1. Reset & Custom Properties
+     2. Base / Typography
+     3. Animations
+     4. Header
+     5. Shell Layout
+     6. Panel (sidebar)
+        6a. Drop Zone
+        6b. Inputs
+        6c. Member List
+        6d. Free Slots Block
+        6e. Export Buttons
+        6f. Storage Bar
+     7. Main Area
+        7a. Page Header (title + meta chips)
+        7b. Filter Strip
+        7c. Calendar Grid
+        7d. Schedule Blocks
+        7e. Empty State
+     8. Tooltip
+     9. Toasts
+    10. Drawer Overlay
+    11. Mobile Bottom Nav
+    12. Footer
+    13. Scrollbar
+    14. Responsive — Tablet  (≤ 900px)
+    15. Responsive — Mobile  (≤ 680px)
+    16. Responsive — Small   (≤ 380px)
+   ════════════════════════════════════════════════════════════ */
+
+
+/* ─── 1. Reset & Custom Properties ──────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Neutrals */
+  --ink:       #1a1917;
+  --ink2:      #5c5b56;
+  --ink3:      #9c9b94;
+  --paper:     #faf9f6;
+  --surf:      #f2f0ea;
+  --rule:      #e5e3db;
+  --rule2:     #ccc9be;
+
+  /* Green — primary brand */
+  --green:     #1a5c3e;
+  --green-mid: #2a7a54;
+  --green-bg:  #edf7f1;
+  --green-bd:  #b8deca;
+  --green-txt: #145230;
+
+  /* Amber — warmth / courses accent */
+  --amber:     #b06a00;
+  --amber-bg:  #fdf3e2;
+  --amber-bd:  #eecb8a;
+
+  /* Indigo — member count accent */
+  --indigo:    #3d4faa;
+  --indigo-bg: #eef0fa;
+  --indigo-bd: #b4bcec;
+
+  /* Rose — errors */
+  --rose:      #9b2335;
+  --rose-bg:   #fdeef0;
+
+  /* Layout */
+  --panel-w:   280px;
+  --hdr-h:     56px;
+  --mob-nav-h: 60px;
+
+  /* Typography */
+  --serif: 'Lora', 'Georgia', serif;
+  --mono:  'DM Mono', 'Cascadia Code', 'Menlo', monospace;
+}
+
+
+/* ─── 2. Base / Typography ───────────────────────────────────── */
+html {
+  font-size: 13px;
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  font-family: var(--mono);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.65;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* ─── 3. Animations ──────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .25; }
+}
+
+
+/* ─── 4. Header ──────────────────────────────────────────────── */
+.hd {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--hdr-h);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  line-height: 1;
+}
+.wordmark em { font-style: italic; color: var(--green); }
+
+.hd-divider { flex: 1; height: 1px; background: var(--rule); }
+
+.hd-badge {
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+}
+
+/* Mobile: toggle button — hidden on desktop */
+.mob-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--rule2);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink2);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.mob-toggle:hover { border-color: var(--ink); color: var(--ink); }
+
+
+/* ─── 5. Shell Layout ────────────────────────────────────────── */
+.shell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+
+/* ─── 6. Panel (sidebar) ─────────────────────────────────────── */
+.panel {
+  width: var(--panel-w);
+  flex-shrink: 0;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: calc(100vh - var(--hdr-h));
+  position: sticky;
+  top: var(--hdr-h);
+  background: var(--paper);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* Panel section blocks */
+.pb {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--rule);
+  animation: fadeUp .3s ease both;
+}
+.pb:nth-child(2) { animation-delay: .05s; }
+.pb:nth-child(3) { animation-delay: .10s; }
+.pb:nth-child(4) { animation-delay: .15s; }
+.pb:nth-child(5) { animation-delay: .20s; }
+
+/* Section labels */
+.lbl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 13px;
+}
+.lbl::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Drawer close row — only shown inside mobile drawer */
+.drawer-close-row {
+  display: none;
+  padding: 14px 18px 0;
+  justify-content: flex-end;
+}
+.drawer-close-row button {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+
+/* ─── 6a. Drop Zone ──────────────────────────────────────────── */
+.drop {
+  border: 1.5px dashed var(--rule2);
+  padding: 18px 14px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--surf);
+  transition: border-color .15s, background .15s;
+}
+.drop:hover,
+.drop.drag {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+
+.drop-icon {
+  display: block;
+  font-size: 20px;
+  color: var(--ink3);
+  margin-bottom: 6px;
+  transition: color .15s, transform .2s;
+}
+.drop:hover .drop-icon {
+  color: var(--green);
+  transform: translateY(-2px);
+}
+
+.drop-label { font-size: 11.5px; color: var(--ink2); font-weight: 500; }
+.drop-hint  { font-size: 10px; color: var(--ink3); margin-top: 3px; }
+
+#fi { display: none; }
+
+.prev-wrap { display: none; margin-top: 10px; }
+.prev-wrap img {
+  width: 100%;
+  height: 68px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  display: block;
+}
+.prev-caption { font-size: 10px; color: var(--ink3); text-align: center; margin-top: 4px; }
+
+
+/* ─── 6b. Inputs ─────────────────────────────────────────────── */
+.irow { display: flex; gap: 6px; margin-top: 10px; }
+
+input.txt {
+  flex: 1;
+  border: 1px solid var(--rule2);
+  background: white;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  padding: 9px 10px;
+  outline: none;
+  min-height: 38px;
+  -webkit-appearance: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input.txt:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-bg);
+}
+input.txt::placeholder { color: var(--ink3); }
+
+.btn {
+  padding: 9px 13px;
+  background: var(--green);
+  color: white;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 38px;
+  transition: background .15s;
+}
+.btn:hover    { background: var(--green-mid); }
+.btn:disabled { background: var(--rule2); color: var(--ink3); cursor: default; }
+
+
+/* ─── 6c. Member List ────────────────────────────────────────── */
+.ml { display: flex; flex-direction: column; gap: 2px; }
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  user-select: none;
+  min-height: 44px;
+  transition: border-color .12s, background .12s, opacity .12s;
+}
+.member-row:hover  { border-color: var(--rule); background: var(--surf); }
+.member-row.dim    { opacity: .3; }
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.member-info  { flex: 1; min-width: 0; }
+.member-name  {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.member-status { font-size: 10px; color: var(--ink3); line-height: 1.3; }
+
+.saved-badge {
+  font-size: 9px;
+  color: var(--green);
+  background: var(--green-bg);
+  border: 1px solid var(--green-bd);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.ok   { background: var(--green); }
+.status-dot.busy { background: var(--amber); animation: pulse 1s infinite; }
+.status-dot.err  { background: var(--rose); }
+
+.del-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: var(--ink3);
+  cursor: pointer;
+  padding: 4px 6px;
+  line-height: 1;
+  opacity: 0;
+  border-radius: 3px;
+  transition: opacity .1s, color .1s;
+}
+.member-row:hover .del-btn { opacity: 1; }
+.del-btn:hover { color: var(--rose); background: var(--rose-bg); }
+
+.empty-members {
+  font-size: 11px;
+  color: var(--ink3);
+  text-align: center;
+  padding: 16px 0;
+  font-style: italic;
+  font-family: var(--serif);
+}
+
+
+/* ─── 6d. Free Slots Block ───────────────────────────────────── */
+.free-block {
+  background: linear-gradient(135deg, var(--green-bg) 0%, #e8f5ec 100%);
+  border: 1px solid var(--green-bd);
+  padding: 12px 13px;
+}
+
+.free-title {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--green-txt);
+  letter-spacing: .04em;
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.free-title::before {
+  content: '✓';
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.chip {
+  font-size: 10px;
+  font-family: var(--mono);
+  border: 1px solid var(--green-bd);
+  color: var(--green-txt);
+  background: white;
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+
+/* ─── 6e. Export Buttons ─────────────────────────────────────── */
+.erow { display: flex; gap: 6px; }
+
+.export-btn {
+  flex: 1;
+  padding: 9px 0;
+  border: 1px solid var(--rule2);
+  background: white;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .04em;
+  color: var(--ink2);
+  cursor: pointer;
+  text-align: center;
+  min-height: 36px;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.export-btn:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-bg);
+}
+
+
+/* ─── 6f. Storage Bar ────────────────────────────────────────── */
+.storage-bar {
+  font-size: 10px;
+  line-height: 1.9;
+  font-family: var(--mono);
+}
+.storage-bar button {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink3);
+  cursor: pointer;
+  padding: 0 0 0 8px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+
+/* ─── 7. Main Area ───────────────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 36px 40px;
+  overflow-x: auto;
+  min-width: 0;
+  animation: fadeUp .35s .1s ease both;
+}
+
+
+/* ─── 7a. Page Header ────────────────────────────────────────── */
+.chead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ctitle {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -.025em;
+  line-height: 1.1;
+}
+.ctitle em { font-style: italic; color: var(--green); }
+
+.meta-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.meta-chip {
+  font-size: 11px;
+  padding: 5px 11px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+.meta-chip.members { background: var(--indigo-bg); color: var(--indigo); border: 1px solid var(--indigo-bd); }
+.meta-chip.courses  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-bd); }
+.meta-chip.free     { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-bd); }
+
+
+/* ─── 7b. Filter Strip ───────────────────────────────────────── */
+.fstrip {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.fstrip::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  padding: 7px 15px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: white;
+  border: 1px solid var(--rule);
+  color: var(--ink3);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 34px;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.filter-btn:hover        { border-color: var(--rule2); color: var(--ink); }
+.filter-btn.on           { background: var(--ink);   border-color: var(--ink);   color: white; }
+.filter-btn.free-filter.on { background: var(--green); border-color: var(--green); color: white; }
+
+
+/* ─── 7c. Calendar Grid ──────────────────────────────────────── */
+.cal-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+
+.cal {
+  border: 1px solid var(--rule);
+  min-width: 480px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+.cal-grid { display: grid; }
+
+.cal-corner {
+  background: var(--surf);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  height: 48px;
+}
+
+.cal-day-header {
+  background: var(--surf);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.cal-day-header:last-child { border-right: none; }
+
+.day-name {
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.day-free-badge {
+  font-size: 9px;
+  background: var(--green-bg);
+  color: var(--green-txt);
+  border: 1px solid var(--green-bd);
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+.time-cell {
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 10px;
+  color: var(--ink3);
+  background: var(--surf);
+}
+
+.cal-cell {
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  height: 48px;
+  position: relative;
+  background: white;
+  transition: background .1s;
+}
+.cal-cell:last-child { border-right: none; }
+
+.cal-cell.free-slot {
+  background: linear-gradient(180deg, var(--green-bg) 0%, #f2fbf5 100%);
+}
+.cal-cell.free-slot::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--green-mid);
+  opacity: .6;
+}
+
+
+/* ─── 7d. Schedule Blocks ────────────────────────────────────── */
+.blk {
+  position: absolute;
+  left: 3px; right: 3px; top: 3px;
+  border-left: 3px solid;
+  padding: 4px 6px;
+  overflow: hidden;
+  cursor: default;
+  z-index: 2;
+  border-radius: 0 2px 2px 0;
+  transition: filter .12s, box-shadow .12s;
+}
+.blk:hover {
+  filter: brightness(.93);
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  z-index: 9;
+}
+
+.blk-name {
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.blk-sub {
+  font-size: 9.5px;
+  opacity: .65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+
+/* ─── 7e. Empty State ────────────────────────────────────────── */
+.empty-state {
+  padding: 80px 0;
+  text-align: center;
+}
+.empty-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+.empty-sub {
+  font-size: 11.5px;
+  color: var(--ink3);
+  line-height: 1.8;
+}
+
+
+/* ─── 8. Tooltip ─────────────────────────────────────────────── */
+.tip {
+  position: fixed;
+  background: var(--ink);
+  color: white;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 10px 13px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  max-width: 220px;
+  white-space: pre-line;
+  line-height: 1.8;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  transition: opacity .12s;
+}
+.tip.on { opacity: 1; }
+
+
+/* ─── 9. Toasts ──────────────────────────────────────────────── */
+.tts {
+  position: fixed;
+  bottom: 76px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 9999;
+}
+
+.toast {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 9px 15px;
+  max-width: 280px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.15);
+  animation: fadeUp .18s ease;
+}
+.toast.default { background: var(--ink);   color: white; }
+.toast.ok      { background: var(--green); color: white; }
+.toast.err     { background: var(--rose);  color: white; }
+
+
+/* ─── 10. Drawer Overlay ─────────────────────────────────────── */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 150;
+  opacity: 0;
+  transition: opacity .25s;
+}
+.drawer-overlay.vis { opacity: 1; }
+
+
+/* ─── 11. Mobile Bottom Nav ──────────────────────────────────── */
+.mob-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--mob-nav-h);
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 200;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.mob-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink3);
+  letter-spacing: .04em;
+  padding: 6px 14px;
+  min-width: 52px;
+  min-height: 44px;
+  justify-content: center;
+  transition: color .12s;
+}
+.mob-nav-btn.on          { color: var(--ink); }
+#navFree.on              { color: var(--green); }
+
+.nav-icon { font-size: 16px; line-height: 1; }
+
+
+/* ─── 12. Footer ─────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 40px;
+  background: var(--surf);
+}
+
+.footer-brand {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.footer-brand em { font-style: italic; color: var(--green); }
+
+.footer-text {
+  font-size: 10.5px;
+  color: var(--ink3);
+  line-height: 2;
+}
+.footer-text strong { color: var(--ink2); font-weight: 500; }
+
+.footer-section-title {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 11px;
+}
+
+
+/* ─── 13. Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--rule2); border-radius: 2px; }
+
+
+/* ─── 14. Responsive — Tablet (≤ 900px) ─────────────────────── */
+@media (max-width: 900px) {
+  .hd    { padding: 0 20px; }
+  .main  { padding: 28px 20px; }
+  footer { padding: 28px 20px; gap: 24px; }
+  :root  { --panel-w: 248px; }
+}
+
+
+/* ─── 15. Responsive — Mobile (≤ 680px) ─────────────────────── */
+@media (max-width: 680px) {
+  :root { --panel-w: 292px; }
+
+  .hd        { padding: 0 16px; gap: 10px; }
+  .hd-badge  { display: none; }
+  .mob-toggle { display: flex; }
+
+  .shell { overflow: visible; }
+
+  /* Panel becomes a fixed left drawer */
+  .panel {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100%;
+    z-index: 200;
+    transform: translateX(-100%);
+    box-shadow: none;
+    width: var(--panel-w);
+    overflow-y: auto;
+  }
+  .panel.open {
+    transform: translateX(0);
+    box-shadow: 6px 0 28px rgba(0,0,0,.15);
+  }
+
+  .drawer-overlay { display: block; }
+
+  .drawer-close-row { display: flex; }
+
+  .main {
+    padding: 20px 16px;
+    padding-bottom: calc(var(--mob-nav-h) + 20px + env(safe-area-inset-bottom));
+    width: 100%;
+  }
+
+  .mob-nav { display: flex; }
+
+  .tts { bottom: calc(var(--mob-nav-h) + 14px + env(safe-area-inset-bottom)); right: 12px; }
+
+  .ctitle { font-size: 24px; }
+  .chead  { margin-bottom: 18px; }
+
+  footer { grid-template-columns: 1fr; gap: 22px; padding: 24px 16px; }
+
+  .tip { display: none; } /* tooltips don't work well on touch */
+}
+
+
+/* ─── 16. Responsive — Small (≤ 380px) ──────────────────────── */
+@media (max-width: 380px) {
+  :root { --panel-w: 100vw; }
+  .ctitle    { font-size: 20px; }
+  .filter-btn { padding: 7px 10px; font-size: 9.5px; }
+}
