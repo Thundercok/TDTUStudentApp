@@ -1,13 +1,13 @@
-import os, json, base64, re
+import os, json, re, base64
 from flask import Flask, request, jsonify, render_template, Response
 from dotenv import load_dotenv
-import anthropic
+import google.generativeai as genai
 
 load_dotenv()
 app = Flask(__name__)
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-flash")
 
-# ── Khung giờ chuẩn TDTU ────────────────────────────────────────────────────
 TIET_MAP = {
     1: "07:00", 2: "07:50", 3: "08:40", 4: "09:40",
     5: "10:30", 6: "11:20", 7: "12:30", 8: "13:20",
@@ -65,32 +65,18 @@ def parse_schedule():
             media_type = "image/webp"
 
     try:
-        msg = client.messages.create(
-            model="claude-opus-4-5",
-            max_tokens=2000,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": media_type,
-                            "data": image_b64
-                        }
-                    },
-                    {"type": "text", "text": PROMPT}
-                ]
-            }]
-        )
+        image_bytes = base64.b64decode(image_b64)
+        image_part = {"mime_type": media_type, "data": image_bytes}
 
-        raw = msg.content[0].text.strip()
+        response = model.generate_content([PROMPT, image_part])
+        raw = response.text.strip()
 
-        # Strip markdown fences if any
-        raw = re.sub(r"```json|```", "", raw).strip()
-        parsed = json.loads(raw)
+        # Robustly extract JSON
+        match = re.search(r'\{[\s\S]*\}', raw)
+        if not match:
+            raise json.JSONDecodeError("No JSON object in response", raw, 0)
+        parsed = json.loads(match.group())
 
-        # Enrich with time strings
         for cls in parsed.get("classes", []):
             cls["time_start"] = tiet_to_time(cls["tiet_start"])
             cls["time_end"] = tiet_to_time(cls["tiet_end"] + 1) if cls["tiet_end"] < 12 else "17:40"
@@ -106,11 +92,9 @@ def parse_schedule():
 
 @app.route("/api/merge-schedules", methods=["POST"])
 def merge_schedules():
-    """Tổng hợp lịch tất cả thành viên, tìm khung giờ rảnh chung."""
     data = request.get_json()
-    all_schedules = data.get("schedules", [])  # list of {name, classes:[]}
+    all_schedules = data.get("schedules", [])
 
-    # Build busy map: {day: {tiet: [members busy]}}
     busy = {d: {t: [] for t in range(1, 13)} for d in range(2, 8)}
     all_classes = []
 
@@ -125,16 +109,11 @@ def merge_schedules():
 
     member_names = [s["name"] for s in all_schedules]
 
-    # Find free slots (all members free)
     free_slots = []
     for d in range(2, 8):
         for t in range(1, 13):
             if len(busy[d][t]) == 0 and len(member_names) > 0:
-                free_slots.append({
-                    "day": d,
-                    "tiet": t,
-                    "time": tiet_to_time(t)
-                })
+                free_slots.append({"day": d, "tiet": t, "time": tiet_to_time(t)})
 
     return jsonify({
         "success": True,
@@ -149,57 +128,39 @@ def service_worker():
     sw = """
 const CACHE = 'lichclb-v1';
 const ASSETS = ['/', '/static/manifest.json'];
-
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
-
 self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ).then(() => self.clients.claim()));
 });
-
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  // Always go network-first for API calls
   if (url.pathname.startsWith('/api/')) {
     e.respondWith(fetch(e.request).catch(() =>
-      new Response(JSON.stringify({error:'Không có mạng. Vui lòng kết nối internet để đọc lịch.'}),
-        {headers:{'Content-Type':'application/json'}})
+      new Response(JSON.stringify({error:'Không có mạng.'}), {headers:{'Content-Type':'application/json'}})
     ));
     return;
   }
-  // Cache-first for everything else (UI shell)
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
-      const clone = res.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone));
-      return res;
-    }))
-  );
+  e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+    const clone = res.clone();
+    caches.open(CACHE).then(c => c.put(e.request, clone));
+    return res;
+  })));
 });
 """
-    return Response(sw, mimetype='application/javascript',
-                    headers={'Service-Worker-Allowed': '/'})
+    return Response(sw, mimetype='application/javascript', headers={'Service-Worker-Allowed': '/'})
 
 
 @app.route("/static/manifest.json")
 def manifest():
-    data = {
-        "name": "Lịch CLB TDTU",
-        "short_name": "LịchCLB",
-        "start_url": "/",
-        "display": "standalone",
-        "background_color": "#fafaf8",
-        "theme_color": "#2a6b4a",
-        "icons": []
-    }
-    return jsonify(data)
+    return jsonify({
+        "name": "Lịch CLB TDTU", "short_name": "LịchCLB",
+        "start_url": "/", "display": "standalone",
+        "background_color": "#fafaf8", "theme_color": "#2a6b4a", "icons": []
+    })
 
 
 if __name__ == "__main__":
