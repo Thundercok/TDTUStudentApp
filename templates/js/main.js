@@ -3,114 +3,61 @@
  * Shared mutable state, cached DOM references,
  * all event listener wiring, and boot sequence.
  *
- * Load order: constants → storage → ui → calendar → main
+ * Load order: constants → config → storage → ui → upload → calendar → gsheets → main
  */
 
 
 /* ════════════════════════════════════════════════════════════
    SHARED STATE
-   These are written by multiple modules, so they live here
-   as window-scoped variables (accessible everywhere).
+   Written by multiple modules — kept here as globals.
    ════════════════════════════════════════════════════════════ */
 
-let members     = [];   // Array of member objects
-let allClasses  = [];   // Merged flat list of all classes
-let freeSlots   = [];   // Slots where all visible members are free
-let pendingFile = null; // File object waiting to be added
+let members    = [];   // Array of member objects
+let allClasses = [];   // Merged flat list of all visible classes
+let freeSlots  = [];   // Slots where every visible member is free
 
 
 /* ════════════════════════════════════════════════════════════
-   DOM REFERENCES
-   Cache every element that is accessed more than once.
+   DOM REFERENCES  (cached for performance)
    ════════════════════════════════════════════════════════════ */
 
 const panel       = document.getElementById('panel');
 const overlay     = document.getElementById('drawerOverlay');
 const drawerClose = document.getElementById('drawerClose');
 const ml          = document.getElementById('ml');
-const dz          = document.getElementById('dz');
-const fi          = document.getElementById('fi');
 const ni          = document.getElementById('ni');
 const ba          = document.getElementById('ba');
-const pw          = document.getElementById('pw');
-const pi          = document.getElementById('pi');
-
-
-/* ════════════════════════════════════════════════════════════
-   FILE UPLOAD — drop zone + file input
-   ════════════════════════════════════════════════════════════ */
-
-dz.addEventListener('click', () => fi.click());
-
-dz.addEventListener('dragover', e => {
-  e.preventDefault();
-  dz.classList.add('drag');
-});
-dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
-
-dz.addEventListener('drop', e => {
-  e.preventDefault();
-  dz.classList.remove('drag');
-  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
-});
-
-fi.addEventListener('change', () => {
-  if (fi.files[0]) setFile(fi.files[0]);
-  fi.value = ''; // reset so the same file can be re-selected
-});
-
-function setFile(f) {
-  pendingFile = f;
-  pi.src = URL.createObjectURL(f);
-  pw.style.display = 'block';
-  ni.focus();
-  checkReady();
-}
-
-
-/* ════════════════════════════════════════════════════════════
-   NAME INPUT
-   ════════════════════════════════════════════════════════════ */
-
-ni.addEventListener('input', checkReady);
-ni.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !ba.disabled) addMember();
-});
-
-// Enable/disable the Add button based on whether both name + file are ready
-function checkReady() {
-  ba.disabled = !(pendingFile && ni.value.trim());
-}
 
 
 /* ════════════════════════════════════════════════════════════
    ADD MEMBER
+   "Thêm" button — collects data from whichever upload tab
+   is active, then calls the server (if needed) and saves.
    ════════════════════════════════════════════════════════════ */
 
 ba.addEventListener('click', addMember);
+ni.addEventListener('input', checkAddReady); // re-check when name changes
+ni.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !ba.disabled) addMember();
+});
 
 async function addMember() {
   const name = ni.value.trim();
-  if (!name || !pendingFile) return;
+  if (!name) return;
 
-  // Pick next colour from palette (wraps around)
-  const colorIndex = members.length % PAL.length;
-  const m = {
+  // Pick next colour from palette
+  const ci = members.length % PAL.length;
+  const m  = {
     id:      Date.now(),
     name,
-    c:       PAL[colorIndex].c,
-    bg:      PAL[colorIndex].bg,
+    c:       PAL[ci].c,
+    bg:      PAL[ci].bg,
     classes: [],
     hidden:  false,
     status:  'busy',
   };
 
   members.push(m);
-
-  // Snapshot the file and reset the form immediately
-  const file  = pendingFile;
-  pendingFile = null;
-  pw.style.display = 'none';
   ni.value = '';
   ba.disabled = true;
 
@@ -118,58 +65,36 @@ async function addMember() {
   toast('Đang đọc lịch của ' + name + '…');
   if (isMobile()) closeDrawer();
 
-  // Send image to server for parsing
-  const b64 = await toBase64(file);
   try {
-    const res = await fetch('/api/parse-schedule', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: b64, name }),
-    });
-    const d = await res.json();
-
-    if (d.success) {
-      m.classes = d.data;
-      m.status  = 'ok';
-      m.savedAt = Date.now();
-      toast('✓ ' + d.data.length + ' môn — ' + name, 'ok');
-    } else {
-      m.status = 'err';
-      toast('Lỗi: ' + d.error, 'err');
-    }
-  } catch {
+    m.classes = await collectClasses(name); // from upload.js
+    m.status  = 'ok';
+    m.savedAt = Date.now();
+    toast(`✓ ${m.classes.length} môn — ${name}`, 'ok');
+  } catch (e) {
     m.status = 'err';
-    toast('Lỗi kết nối', 'err');
+    toast('Lỗi: ' + (e.message || 'Không xác định'), 'err');
   }
 
+  resetUploadState();    // from upload.js
   renderMemberList();
   merge();
   save();
 }
 
-// Convert a File to base64 data URL
-function toBase64(f) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload  = () => resolve(reader.result);
-    reader.readAsDataURL(f);
-  });
-}
-
 
 /* ════════════════════════════════════════════════════════════
-   FILTER STRIP  — wire up data-filter buttons
+   FILTER STRIP  (event delegation)
    ════════════════════════════════════════════════════════════ */
 
 document.getElementById('fs').addEventListener('click', e => {
   const btn = e.target.closest('.filter-btn');
   if (!btn) return;
-  applyFilter(btn.dataset.filter, btn);
+  applyFilter(btn.dataset.filter, btn); // from calendar.js
 });
 
 
 /* ════════════════════════════════════════════════════════════
-   DRAWER  — wiring
+   DRAWER  (mobile sidebar)
    ════════════════════════════════════════════════════════════ */
 
 document.getElementById('drawerToggle').addEventListener('click', openDrawer);
@@ -191,11 +116,12 @@ document.getElementById('navFree').addEventListener('click', () => mobTab('free'
 
 
 /* ════════════════════════════════════════════════════════════
-   EXPORT  — wire panel buttons
+   EXPORT BUTTONS
    ════════════════════════════════════════════════════════════ */
 
 document.getElementById('btnPNG').addEventListener('click', expPNG);
 document.getElementById('btnPDF').addEventListener('click', expPDF);
+document.getElementById('btnSheets').addEventListener('click', exportToSheets);
 
 
 /* ════════════════════════════════════════════════════════════
@@ -210,8 +136,16 @@ if ('serviceWorker' in navigator) {
 
 
 /* ════════════════════════════════════════════════════════════
-   BOOT
+   BOOT  — initialise sub-modules then load saved data
    ════════════════════════════════════════════════════════════ */
 
-renderStorageBar();
-load(); // restore any previously saved member data
+initUploadTabs();   // from upload.js — wire tab switcher
+initImageTab();     // from upload.js
+initManualTab();    // from upload.js — populate tiết selects
+initCsvTab();       // from upload.js
+initTextTab();      // from upload.js
+
+initGoogleApi();    // from gsheets.js — start gapi load
+
+renderStorageBar(); // from storage.js
+load();             // from storage.js — restore saved member data
