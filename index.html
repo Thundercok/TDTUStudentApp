@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LịchCLB — TDTU</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F4F0;
+  --surface: #FFFFFF;
+  --surface2: #F0EFE9;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1A1917;
+  --text2: #6B6860;
+  --text3: #9B9A96;
+  --green: #1D9E75;
+  --green-bg: #E1F5EE;
+  --green-dark: #0F6E56;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+
+  --c0: #378ADD; --c0b: #E6F1FB;
+  --c1: #D4537E; --c1b: #FBEAF0;
+  --c2: #BA7517; --c2b: #FAEEDA;
+  --c3: #639922; --c3b: #EAF3DE;
+  --c4: #7F77DD; --c4b: #EEEDFE;
+  --c5: #D85A30; --c5b: #FAECE7;
+  --c6: #1D9E75; --c6b: #E1F5EE;
+  --c7: #888780; --c7b: #F1EFE8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.main {
+  flex: 1;
+  padding: 28px 32px;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+/* ── Sidebar ── */
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+.brand-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .02em;
+}
+
+.sidebar-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+/* ── Upload zone ── */
+.upload-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--surface2);
+}
+.upload-zone:hover { border-color: var(--green); background: var(--green-bg); }
+.upload-zone.drag { border-color: var(--green); background: var(--green-bg); }
+
+.upload-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--green-bg);
+  border: 1px solid rgba(29,158,117,.2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+  color: var(--green);
+  font-size: 16px;
+}
+
+.upload-zone p { font-size: 12px; color: var(--text2); }
+.upload-zone strong { color: var(--text); font-weight: 500; }
+.upload-zone span { font-size: 10px; color: var(--text3); display: block; margin-top: 2px; }
+
+#fileInput { display: none; }
+
+/* ── Member name input ── */
+.name-input-row {
+  display: flex; gap: 6px; margin-top: 10px;
+}
+.name-input-row input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.name-input-row input:focus { border-color: var(--green); }
+.name-input-row input::placeholder { color: var(--text3); }
+
+.btn-add {
+  padding: 7px 14px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity .15s;
+}
+.btn-add:hover { opacity: .85; }
+.btn-add:disabled { opacity: .4; cursor: default; }
+
+/* ── Members list ── */
+.member-list { display: flex; flex-direction: column; gap: 6px; }
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+}
+.member-item:hover { border-color: var(--border2); }
+.member-item.hidden { opacity: .35; }
+
+.member-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600;
+  flex-shrink: 0;
+}
+
+.member-info { flex: 1; min-width: 0; }
+.member-name { font-weight: 500; font-size: 13px; }
+.member-meta { font-size: 11px; color: var(--text3); }
+
+.member-status {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+.member-item.loading .member-status {
+  background: var(--c2);
+  animation: pulse 1s infinite;
+}
+.member-item.error .member-status { background: #E24B4A; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.btn-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 14px; padding: 0 2px;
+  line-height: 1;
+  display: none;
+}
+.member-item:hover .btn-remove { display: block; }
+.btn-remove:hover { color: #E24B4A; }
+
+/* ── Free slots summary ── */
+.free-summary {
+  background: var(--green-bg);
+  border: 1px solid rgba(29,158,117,.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.free-summary-title {
+  font-size: 11px; font-weight: 600; color: var(--green-dark);
+  margin-bottom: 6px;
+}
+.free-slots-list { display: flex; flex-wrap: wrap; gap: 4px; }
+.free-chip {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  background: white;
+  border: 1px solid rgba(29,158,117,.25);
+  color: var(--green-dark);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* ── Export button ── */
+.btn-export {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all .15s;
+  margin-top: 6px;
+}
+.btn-export:hover { background: var(--surface2); color: var(--text); }
+
+/* ── Main area ── */
+.main-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.main-title { font-size: 22px; font-weight: 600; letter-spacing: -0.4px; }
+.main-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+/* ── Stats ── */
+.stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  min-width: 90px;
+}
+.stat-n { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+.stat-l { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.filter-btn {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--green); color: var(--green); }
+.filter-btn.active { background: var(--green); border-color: var(--green); color: white; }
+
+/* ── Calendar ── */
+.cal-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: 56px repeat(5, 1fr);
+}
+
+.cal-head {
+  display: contents;
+}
+
+.cal-head-corner {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 10px;
+}
+
+.cal-head-day {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 10px 8px;
+  text-align: center;
+}
+.cal-head-day:last-child { border-right: none; }
+
+.cal-day-name {
+  font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.cal-day-date { font-size: 10px; color: var(--text3); margin-top: 1px; font-family: 'DM Mono', monospace; }
+
+.cal-body { display: contents; }
+
+.time-label {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text3);
+  height: 48px;
+}
+
+.cal-cell {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  height: 48px;
+  position: relative;
+  transition: background .1s;
+}
+.cal-cell:last-child { border-right: none; }
+.cal-cell.free-all { background: #F0FBF7; }
+.cal-cell.free-all::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-left: 2px solid rgba(29,158,117,.25);
+}
+
+/* ── Class blocks ── */
+.class-block {
+  position: absolute;
+  left: 3px; right: 3px;
+  border-radius: 5px;
+  padding: 3px 5px;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 2;
+  transition: filter .15s, transform .1s;
+}
+.class-block:hover { filter: brightness(.93); transform: scale(1.01); z-index: 10; }
+
+.block-subject {
+  font-size: 10px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.block-meta {
+  font-size: 9px; opacity: .75;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: 'DM Mono', monospace;
+}
+.block-member {
+  font-size: 9px; font-weight: 500;
+}
+
+/* ── Tooltip ── */
+.tooltip {
+  position: fixed;
+  background: var(--text);
+  color: white;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 200px;
+  opacity: 0;
+  transition: opacity .15s;
+  line-height: 1.6;
+}
+.tooltip.show { opacity: 1; }
+
+/* ── Empty state ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text3);
+  text-align: center;
+  gap: 8px;
+}
+.empty-icon { font-size: 36px; margin-bottom: 4px; }
+.empty-title { font-size: 15px; color: var(--text2); font-weight: 500; }
+.empty-sub { font-size: 13px; max-width: 300px; }
+
+/* ── Toast ── */
+.toast-container {
+  position: fixed; bottom: 20px; right: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+  z-index: 9999;
+}
+.toast {
+  background: var(--text);
+  color: white;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  animation: slideIn .2s ease;
+  display: flex; align-items: center; gap: 8px;
+  max-width: 300px;
+}
+.toast.success { background: var(--green-dark); }
+.toast.error { background: #A32D2D; }
+@keyframes slideIn { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+@media (max-width: 700px) {
+  .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border); }
+  .shell { flex-direction: column; }
+  .main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── Sidebar ────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        LịchCLB
+      </div>
+      <div class="brand-sub">TDTU · Tổng hợp thời khoá biểu</div>
+    </div>
+
+    <!-- Upload -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Thêm thành viên</div>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="upload-icon">↑</div>
+        <p><strong>Kéo thả ảnh TKB</strong> vào đây</p>
+        <p>hoặc bấm để chọn file</p>
+        <span>JPG, PNG, WebP · Ảnh chụp màn hình &amp; điện thoại</span>
+      </div>
+
+      <div class="name-input-row">
+        <input type="text" id="memberName" placeholder="Tên thành viên..." maxlength="20">
+        <button class="btn-add" id="btnAdd" disabled>Thêm</button>
+      </div>
+
+      <div id="pendingImg" style="margin-top:8px;display:none">
+        <img id="previewImg" style="width:100%;border-radius:6px;border:1px solid var(--border);max-height:100px;object-fit:cover">
+        <p style="font-size:11px;color:var(--text3);margin-top:4px;text-align:center">Ảnh đã chọn · Điền tên rồi bấm Thêm</p>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div class="sidebar-section" style="flex:1">
+      <div class="sidebar-label">Thành viên (<span id="memberCount">0</span>)</div>
+      <div class="member-list" id="memberList">
+        <div style="font-size:12px;color:var(--text3);text-align:center;padding:12px 0">
+          Chưa có thành viên nào
+        </div>
+      </div>
+    </div>
+
+    <!-- Free slots -->
+    <div class="sidebar-section" id="freeSlotsSection" style="display:none">
+      <div class="sidebar-label">Khung giờ tất cả rảnh</div>
+      <div class="free-summary">
+        <div class="free-summary-title">✓ Có thể họp CLB</div>
+        <div class="free-slots-list" id="freeSlotsList"></div>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Xuất lịch</div>
+      <button class="btn-export" onclick="exportPNG()">
+        <span>↓</span> Xuất ảnh PNG
+      </button>
+      <button class="btn-export" onclick="exportPDF()">
+        <span>↓</span> Xuất PDF
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ──────────────────────────────────────── -->
+  <main class="main" id="mainArea">
+    <div class="main-header">
+      <div>
+        <div class="main-title">Thời khoá biểu chung</div>
+        <div class="main-sub" id="mainSub">Thêm thành viên bên trái để bắt đầu</div>
+      </div>
+      <div class="stats" id="statsBar" style="display:none">
+        <div class="stat">
+          <div class="stat-n" id="statMembers">0</div>
+          <div class="stat-l">Thành viên</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n" id="statClasses">0</div>
+          <div class="stat-l">Môn học</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n" id="statFree">0</div>
+          <div class="stat-l">Giờ rảnh chung</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar" id="filterBar" style="display:none">
+      <button class="filter-btn active" data-day="all" onclick="setFilter('all', this)">Tất cả</button>
+      <button class="filter-btn" data-day="2" onclick="setFilter(2, this)">Thứ 2</button>
+      <button class="filter-btn" data-day="3" onclick="setFilter(3, this)">Thứ 3</button>
+      <button class="filter-btn" data-day="4" onclick="setFilter(4, this)">Thứ 4</button>
+      <button class="filter-btn" data-day="5" onclick="setFilter(5, this)">Thứ 5</button>
+      <button class="filter-btn" data-day="6" onclick="setFilter(6, this)">Thứ 6</button>
+      <button class="filter-btn" data-day="free" onclick="setFilter('free', this)">✓ Chỉ rảnh chung</button>
+    </div>
+
+    <!-- Calendar -->
+    <div id="calContainer">
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <div class="empty-title">Chưa có lịch nào</div>
+        <div class="empty-sub">Upload ảnh thời khoá biểu của từng thành viên để tổng hợp lịch chung</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+const COLORS = [
+  {c:'#378ADD',bg:'#E6F1FB'},{c:'#D4537E',bg:'#FBEAF0'},{c:'#BA7517',bg:'#FAEEDA'},
+  {c:'#639922',bg:'#EAF3DE'},{c:'#7F77DD',bg:'#EEEDFE'},{c:'#D85A30',bg:'#FAECE7'},
+  {c:'#1D9E75',bg:'#E1F5EE'},{c:'#888780',bg:'#F1EFE8'}
+];
+
+const TIET_TIMES = {
+  1:'07:00',2:'07:50',3:'08:40',4:'09:40',5:'10:30',6:'11:20',
+  7:'12:30',8:'13:20',9:'14:10',10:'15:10',11:'16:00',12:'16:50'
+};
+
+const DAYS = [
+  {label:'Thứ 2', short:'T2'},
+  {label:'Thứ 3', short:'T3'},
+  {label:'Thứ 4', short:'T4'},
+  {label:'Thứ 5', short:'T5'},
+  {label:'Thứ 6', short:'T6'},
+];
+
+let members = [];      // {id, name, color, bg, classes:[], hidden:false}
+let allClasses = [];   // merged
+let freeSlots = [];
+let activeFilter = 'all';
+let pendingFile = null;
+
+// ── Upload handling ────────────────────────────────────────────────────────────
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+const memberName = document.getElementById('memberName');
+const btnAdd     = document.getElementById('btnAdd');
+const pendingDiv = document.getElementById('pendingImg');
+const previewImg = document.getElementById('previewImg');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) setFile(f);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) setFile(fileInput.files[0]);
+  fileInput.value = '';
+});
+
+memberName.addEventListener('input', checkReady);
+
+function setFile(f) {
+  pendingFile = f;
+  const url = URL.createObjectURL(f);
+  previewImg.src = url;
+  pendingDiv.style.display = 'block';
+  memberName.focus();
+  checkReady();
+}
+
+function checkReady() {
+  btnAdd.disabled = !(pendingFile && memberName.value.trim().length > 0);
+}
+
+// ── Add member ─────────────────────────────────────────────────────────────────
+btnAdd.addEventListener('click', addMember);
+memberName.addEventListener('keydown', e => { if (e.key === 'Enter' && !btnAdd.disabled) addMember(); });
+
+async function addMember() {
+  const name = memberName.value.trim();
+  if (!name || !pendingFile) return;
+
+  const colorIdx = members.length % COLORS.length;
+  const member = {
+    id: Date.now(),
+    name,
+    color: COLORS[colorIdx].c,
+    bg: COLORS[colorIdx].bg,
+    classes: [],
+    hidden: false,
+    status: 'loading'
+  };
+
+  members.push(member);
+  renderMemberList();
+  toast(`Đang đọc lịch của ${name}...`, 'info');
+
+  // Reset UI
+  const file = pendingFile;
+  pendingFile = null;
+  pendingDiv.style.display = 'none';
+  memberName.value = '';
+  btnAdd.disabled = true;
+
+  // Convert to base64
+  const b64 = await fileToB64(file);
+
+  try {
+    const res = await fetch('/api/parse-schedule', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ image: b64, name })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      member.classes = data.data;
+      member.status = 'ok';
+      toast(`✓ Đọc được ${data.data.length} môn của ${name}`, 'success');
+    } else {
+      member.status = 'error';
+      toast(`Lỗi đọc lịch ${name}: ${data.error}`, 'error');
+    }
+  } catch(e) {
+    member.status = 'error';
+    toast(`Lỗi kết nối khi đọc lịch ${name}`, 'error');
+  }
+
+  renderMemberList();
+  mergeAndRender();
+}
+
+function fileToB64(file) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(file);
+  });
+}
+
+// ── Render member list ─────────────────────────────────────────────────────────
+function renderMemberList() {
+  const list = document.getElementById('memberList');
+  document.getElementById('memberCount').textContent = members.length;
+
+  if (members.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px 0">Chưa có thành viên nào</div>';
+    return;
+  }
+
+  list.innerHTML = members.map(m => `
+    <div class="member-item ${m.hidden?'hidden':''} ${m.status}" 
+         onclick="toggleMember(${m.id})" title="Bấm để ẩn/hiện">
+      <div class="member-avatar" style="background:${m.bg};color:${m.color}">
+        ${m.name.charAt(0).toUpperCase()}
+      </div>
+      <div class="member-info">
+        <div class="member-name">${escHtml(m.name)}</div>
+        <div class="member-meta">
+          ${m.status==='loading' ? 'Đang đọc lịch...' :
+            m.status==='error'   ? 'Lỗi đọc lịch' :
+            m.classes.length + ' môn học'}
+        </div>
+      </div>
+      <div class="member-status"></div>
+      <button class="btn-remove" onclick="removeMember(event,${m.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function toggleMember(id) {
+  const m = members.find(x => x.id === id);
+  if (m) { m.hidden = !m.hidden; renderMemberList(); mergeAndRender(); }
+}
+
+function removeMember(e, id) {
+  e.stopPropagation();
+  members = members.filter(x => x.id !== id);
+  renderMemberList();
+  mergeAndRender();
+}
+
+// ── Merge & render calendar ────────────────────────────────────────────────────
+async function mergeAndRender() {
+  const visible = members.filter(m => !m.hidden && m.status === 'ok');
+
+  if (visible.length === 0) {
+    allClasses = [];
+    freeSlots = [];
+    renderCalendar();
+    updateStats();
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/merge-schedules', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ schedules: visible.map(m => ({name:m.name, classes:m.classes})) })
+    });
+    const data = await res.json();
+    if (data.success) {
+      allClasses = data.classes;
+      freeSlots = data.free_slots;
+    }
+  } catch(e) {
+    // Fallback: merge client-side
+    allClasses = visible.flatMap(m => m.classes);
+    freeSlots = computeFreeSlots(visible);
+  }
+
+  renderCalendar();
+  updateStats();
+  renderFreeSlots();
+}
+
+function computeFreeSlots(visible) {
+  const busy = {};
+  for (let d = 2; d <= 6; d++) {
+    busy[d] = {};
+    for (let t = 1; t <= 12; t++) busy[d][t] = 0;
+  }
+  visible.forEach(m => m.classes.forEach(cls => {
+    for (let t = cls.tiet_start; t <= cls.tiet_end; t++) {
+      if (busy[cls.day] && busy[cls.day][t] !== undefined) busy[cls.day][t]++;
+    }
+  }));
+  const free = [];
+  for (let d = 2; d <= 6; d++) {
+    for (let t = 1; t <= 12; t++) {
+      if (busy[d][t] === 0) free.push({day:d, tiet:t, time:TIET_TIMES[t]});
+    }
+  }
+  return free;
+}
+
+// ── Calendar render ────────────────────────────────────────────────────────────
+function renderCalendar() {
+  const container = document.getElementById('calContainer');
+
+  const visibleDays = activeFilter === 'all' || activeFilter === 'free'
+    ? [2,3,4,5,6]
+    : [parseInt(activeFilter)];
+
+  if (members.filter(m => !m.hidden && m.status==='ok').length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📅</div>
+        <div class="empty-title">Chưa có lịch nào</div>
+        <div class="empty-sub">Upload ảnh thời khoá biểu của từng thành viên để tổng hợp lịch chung</div>
+      </div>`;
+    document.getElementById('filterBar').style.display = 'none';
+    document.getElementById('statsBar').style.display = 'none';
+    document.getElementById('mainSub').textContent = 'Thêm thành viên bên trái để bắt đầu';
+    return;
+  }
+
+  document.getElementById('filterBar').style.display = 'flex';
+  document.getElementById('statsBar').style.display = 'flex';
+  document.getElementById('mainSub').textContent = `Tuần hiện tại · ${members.filter(m=>!m.hidden&&m.status==='ok').length} thành viên`;
+
+  const cols = visibleDays.length;
+  const gridCols = `56px repeat(${cols}, 1fr)`;
+
+  let html = `<div class="cal-wrap" id="calGrid">
+    <div class="cal-grid" style="grid-template-columns:${gridCols}">
+      <div class="cal-head-corner"></div>`;
+
+  visibleDays.forEach(d => {
+    const day = DAYS[d-2];
+    const hasFree = freeSlots.some(s => s.day === d);
+    html += `<div class="cal-head-day">
+      <div class="cal-day-name">${day.label}</div>
+      ${hasFree ? '<div class="cal-day-date" style="color:var(--green)">● rảnh</div>' : '<div class="cal-day-date">—</div>'}
+    </div>`;
+  });
+
+  for (let tiet = 1; tiet <= 12; tiet++) {
+    html += `<div class="time-label">${TIET_TIMES[tiet]}</div>`;
+
+    visibleDays.forEach(d => {
+      const isFree = freeSlots.some(s => s.day === d && s.tiet === tiet);
+      const showFree = isFree && (activeFilter === 'all' || activeFilter === 'free');
+      html += `<div class="cal-cell${showFree?' free-all':''}" data-day="${d}" data-tiet="${tiet}">`;
+
+      // Find blocks starting at this tiet
+      const blocks = getBlocksAt(d, tiet);
+      const blockW = blocks.length > 0 ? Math.floor(100 / blocks.length) : 100;
+
+      blocks.forEach((b, bi) => {
+        const member = members.find(m => m.name === b.member);
+        if (!member) return;
+        const height = (b.tiet_end - b.tiet_start + 1) * 48;
+        const top = 2;
+        const left = bi * blockW + 1;
+        const width = blockW - 2;
+        html += `<div class="class-block"
+          style="top:${top}px;height:${height-4}px;left:${left}%;width:${width}%;background:${member.bg};border-left:3px solid ${member.color};color:${member.color}"
+          onmouseenter="showTip(event,this,'${escHtml(b.subject)}','${escHtml(b.member)}','${b.room||''}','${b.time_start||''}','${b.time_end||''}')"
+          onmouseleave="hideTip()">
+          <div class="block-member">${escHtml(member.name.charAt(0))}</div>
+          <div class="block-subject">${escHtml(b.subject)}</div>
+          ${b.room ? `<div class="block-meta">${escHtml(b.room)}</div>` : ''}
+        </div>`;
+      });
+
+      html += `</div>`;
+    });
+  }
+
+  html += `</div></div>`;
+  container.innerHTML = html;
+}
+
+function getBlocksAt(day, tiet) {
+  return allClasses.filter(c => c.day === day && c.tiet_start === tiet);
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const vis = members.filter(m => !m.hidden && m.status === 'ok');
+  document.getElementById('statMembers').textContent = vis.length;
+  document.getElementById('statClasses').textContent = allClasses.length;
+  document.getElementById('statFree').textContent = freeSlots.length;
+}
+
+// ── Free slots sidebar ─────────────────────────────────────────────────────────
+function renderFreeSlots() {
+  const sec = document.getElementById('freeSlotsSection');
+  const lst = document.getElementById('freeSlotsList');
+  if (freeSlots.length === 0) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+
+  const DAY_NAMES = {2:'T2',3:'T3',4:'T4',5:'T5',6:'T6'};
+  lst.innerHTML = freeSlots.slice(0, 12).map(s =>
+    `<div class="free-chip">${DAY_NAMES[s.day]} ${s.time}</div>`
+  ).join('') + (freeSlots.length > 12 ? `<div class="free-chip">+${freeSlots.length-12}</div>` : '');
+}
+
+// ── Filter ─────────────────────────────────────────────────────────────────────
+function setFilter(val, btn) {
+  activeFilter = val;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalendar();
+}
+
+// ── Tooltip ────────────────────────────────────────────────────────────────────
+const tip = document.getElementById('tooltip');
+function showTip(e, el, subject, member, room, ts, te) {
+  tip.innerHTML = `<b>${subject}</b><br>${member}${room?'<br>Phòng: '+room:''}<br>${ts}–${te}`;
+  tip.style.left = (e.clientX + 12) + 'px';
+  tip.style.top  = (e.clientY - 10) + 'px';
+  tip.classList.add('show');
+}
+function hideTip() { tip.classList.remove('show'); }
+document.addEventListener('mousemove', e => {
+  tip.style.left = (e.clientX + 12) + 'px';
+  tip.style.top  = (e.clientY - 10) + 'px';
+});
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+function toast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+// ── Export ─────────────────────────────────────────────────────────────────────
+async function exportPNG() {
+  const el = document.getElementById('calGrid');
+  if (!el) { toast('Chưa có lịch để xuất', 'error'); return; }
+  toast('Đang xuất ảnh...', 'info');
+  const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff'});
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'lich-clb-tdtu.png';
+  a.click();
+  toast('✓ Đã xuất ảnh PNG', 'success');
+}
+
+async function exportPDF() {
+  const el = document.getElementById('calGrid');
+  if (!el) { toast('Chưa có lịch để xuất', 'error'); return; }
+  toast('Đang xuất PDF...', 'info');
+  const { jsPDF } = window.jspdf;
+  const canvas = await html2canvas(el, {scale:2, backgroundColor:'#ffffff'});
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  const w = pdf.internal.pageSize.getWidth();
+  const h = (canvas.height / canvas.width) * w;
+  pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+  pdf.save('lich-clb-tdtu.pdf');
+  toast('✓ Đã xuất PDF', 'success');
+}
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
