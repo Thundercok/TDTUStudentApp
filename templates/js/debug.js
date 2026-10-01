@@ -27,7 +27,7 @@ const SAMPLE_MEMBERS = [
       { subject: 'Vật lý đại cương',     day: 3, tiet_start: 4,  tiet_end: 6,  room: 'B2.04', time_start: '09:40', time_end: '11:20' },
       { subject: 'Lập trình cơ bản',     day: 4, tiet_start: 7,  tiet_end: 9,  room: 'C3.02', time_start: '12:30', time_end: '14:10' },
       { subject: 'Tiếng Anh 1',          day: 5, tiet_start: 1,  tiet_end: 3,  room: 'A2.05', time_start: '07:00', time_end: '08:40' },
-      { subject: 'Giáo dục thể chất',    day: 6, tiet_start: 10, tiet_end: 12, room: 'Sân A',  time_start: '15:10', time_end: '16:50' },
+      { subject: 'Giáo dục thể chất',    day: 7, tiet_start: 1,  tiet_end: 3,  room: 'Sân A',  time_start: '07:00', time_end: '08:40' },
     ],
   },
   {
@@ -37,7 +37,7 @@ const SAMPLE_MEMBERS = [
       { subject: 'Hóa học đại cương',    day: 2, tiet_start: 7,  tiet_end: 9,  room: 'D1.03', time_start: '12:30', time_end: '14:10' },
       { subject: 'Giải tích 1',          day: 3, tiet_start: 1,  tiet_end: 3,  room: 'A1.02', time_start: '07:00', time_end: '08:40' },
       { subject: 'Lập trình cơ bản',     day: 4, tiet_start: 7,  tiet_end: 9,  room: 'C3.02', time_start: '12:30', time_end: '14:10' },
-      { subject: 'Tiếng Anh 1',          day: 6, tiet_start: 4,  tiet_end: 6,  room: 'A2.06', time_start: '09:40', time_end: '11:20' },
+      { subject: 'Tiếng Anh 1',          day: 7, tiet_start: 4,  tiet_end: 6,  room: 'A2.06', time_start: '09:40', time_end: '11:20' },
     ],
   },
   {
@@ -48,7 +48,7 @@ const SAMPLE_MEMBERS = [
       { subject: 'Kỹ năng mềm',          day: 3, tiet_start: 7,  tiet_end: 8,  room: 'E1.01', time_start: '12:30', time_end: '13:20' },
       { subject: 'Toán cao cấp A1',      day: 4, tiet_start: 1,  tiet_end: 3,  room: 'A1.03', time_start: '07:00', time_end: '08:40' },
       { subject: 'Tiếng Anh 1',          day: 5, tiet_start: 1,  tiet_end: 3,  room: 'A2.05', time_start: '07:00', time_end: '08:40' },
-      { subject: 'Giáo dục thể chất',    day: 6, tiet_start: 1,  tiet_end: 3,  room: 'Sân B', time_start: '07:00', time_end: '08:40' },
+      { subject: 'Giáo dục thể chất',    day: 7, tiet_start: 1,  tiet_end: 3,  room: 'Sân B', time_start: '07:00', time_end: '08:40' },
     ],
   },
   {
@@ -58,7 +58,7 @@ const SAMPLE_MEMBERS = [
       { subject: 'Kỹ năng mềm',          day: 3, tiet_start: 7,  tiet_end: 8,  room: 'E1.01', time_start: '12:30', time_end: '13:20' },
       { subject: 'Vật lý đại cương',     day: 4, tiet_start: 4,  tiet_end: 6,  room: 'B2.02', time_start: '09:40', time_end: '11:20' },
       { subject: 'Giải tích 1',          day: 5, tiet_start: 4,  tiet_end: 6,  room: 'A1.04', time_start: '09:40', time_end: '11:20' },
-      { subject: 'Lập trình cơ bản',     day: 6, tiet_start: 7,  tiet_end: 9,  room: 'C3.01', time_start: '12:30', time_end: '14:10' },
+      { subject: 'Lập trình cơ bản',     day: 7, tiet_start: 7,  tiet_end: 9,  room: 'C3.01', time_start: '12:30', time_end: '14:10' },
     ],
   },
   {
@@ -68,7 +68,7 @@ const SAMPLE_MEMBERS = [
       { subject: 'Vật lý đại cương',     day: 3, tiet_start: 4,  tiet_end: 6,  room: 'B2.04', time_start: '09:40', time_end: '11:20' },
       { subject: 'Kỹ năng mềm',          day: 4, tiet_start: 7,  tiet_end: 8,  room: 'E1.02', time_start: '12:30', time_end: '13:20' },
       { subject: 'Hóa học đại cương',    day: 5, tiet_start: 7,  tiet_end: 9,  room: 'D1.01', time_start: '12:30', time_end: '14:10' },
-      { subject: 'Tiếng Anh 1',          day: 6, tiet_start: 4,  tiet_end: 6,  room: 'A2.07', time_start: '09:40', time_end: '11:20' },
+      { subject: 'Nhập môn Tư duy Logic',day: 7, tiet_start: 4,  tiet_end: 6,  room: 'F713',  time_start: '09:40', time_end: '11:20' },
     ],
   },
 ];
@@ -203,13 +203,13 @@ function loadSampleData(count = SAMPLE_MEMBERS.length) {
   allClasses = members.flatMap(m => m.classes);
 
   const busy = {};
-  for (let d = 2; d <= 6; d++) { busy[d] = {}; for (let t = 1; t <= 12; t++) busy[d][t] = 0; }
+  for (let d = 2; d <= 7; d++) { busy[d] = {}; for (let t = 1; t <= 12; t++) busy[d][t] = 0; }
   members.forEach(m => m.classes.forEach(c => {
     for (let t = c.tiet_start; t <= c.tiet_end; t++)
       if (busy[c.day]?.[t] !== undefined) busy[c.day][t]++;
   }));
   freeSlots = [];
-  for (let d = 2; d <= 6; d++)
+  for (let d = 2; d <= 7; d++)
     for (let t = 1; t <= 12; t++)
       if (busy[d][t] === 0) freeSlots.push({ day: d, tiet: t, time: TIME_TABLE[t] });
 
@@ -250,15 +250,21 @@ function disableDebug() {
   const urlDebug  = new URLSearchParams(window.location.search).has('debug');
   const sessDebug = sessionStorage.getItem('lichclb_debug') === '1';
 
-  if (urlDebug || sessDebug) {
-    // Wait for DOM + other modules to be ready
-    window.addEventListener('DOMContentLoaded', () => {
-      // Slight delay so main.js boot (load()) runs first
-      setTimeout(() => {
-        enableDebug();
-        // Auto-load all 5 members if no saved data exists
-        if (!members.length) loadSampleData();
-      }, 300);
-    });
-  }
+  if (!urlDebug && !sessDebug) return;
+
+  // Use 'load' (fires after all scripts finish) not 'DOMContentLoaded'.
+  // main.js boot runs synchronously at the end of its file, so by the
+  // time 'load' fires, load() has already populated members from localStorage.
+  window.addEventListener('load', () => {
+    enableDebug();
+
+    // ?debug in URL → always override with fresh sample data so you see
+    // a full colourful calendar immediately regardless of localStorage.
+    if (urlDebug) {
+      loadSampleData();
+    } else if (!members.length) {
+      // sessionStorage flag but no saved data → load samples
+      loadSampleData();
+    }
+  });
 })();

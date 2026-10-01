@@ -48,10 +48,10 @@
 
         <!-- Upload mode tabs -->
         <div class="upload-tabs" id="uploadTabs">
-          <button class="utab on" data-tab="image"  title="Upload ảnh TKB">📷 Ảnh</button>
-          <button class="utab"    data-tab="manual" title="Nhập tay từng môn">✏️ Tay</button>
-          <button class="utab"    data-tab="csv"    title="Upload file CSV">📄 CSV</button>
-          <button class="utab"    data-tab="text"   title="Dán văn bản">📋 Text</button>
+          <button class="utab on" data-tab="image"  title="Upload ảnh TKB">Ảnh</button>
+          <button class="utab"    data-tab="manual" title="Nhập tay từng môn">Tay</button>
+          <button class="utab"    data-tab="csv"    title="Upload file CSV">CSV</button>
+          <button class="utab"    data-tab="text"   title="Dán văn bản">Text</button>
         </div>
 
         <!-- ─ Pane: Image ─────────────────────────────── -->
@@ -69,7 +69,7 @@
         </div>
 
         <!-- ─ Pane: Manual Entry ──────────────────────── -->
-        <div class="upload-pane hidden" id="pane-manual">
+        <div class="upload-pane" id="pane-manual" style="display:none">
           <div class="upload-hint">Nhập từng môn, bấm <em>+ Thêm môn</em> sau mỗi môn.</div>
 
           <div class="manual-form">
@@ -106,7 +106,7 @@
         </div>
 
         <!-- ─ Pane: CSV ───────────────────────────────── -->
-        <div class="upload-pane hidden" id="pane-csv">
+        <div class="upload-pane" id="pane-csv" style="display:none">
           <div class="drop" id="dzCsv">
             <input type="file" id="fCsv" accept=".csv,.txt">
             <span class="drop-icon">↑</span>
@@ -128,7 +128,7 @@ Vật lý,5,4,6,</pre>
         </div>
 
         <!-- ─ Pane: Paste Text ────────────────────────── -->
-        <div class="upload-pane hidden" id="pane-text">
+        <div class="upload-pane" id="pane-text" style="display:none">
           <textarea class="txt-area" id="textInput"
             placeholder="Dán nội dung thời khoá biểu vào đây…
 
@@ -221,6 +221,7 @@ Thứ 6: Vật lý đại cương, tiết 4–6"></textarea>
         <button class="filter-btn"             data-filter="4">Thứ 4</button>
         <button class="filter-btn"             data-filter="5">Thứ 5</button>
         <button class="filter-btn"             data-filter="6">Thứ 6</button>
+        <button class="filter-btn"             data-filter="7">Thứ 7</button>
         <button class="filter-btn free-filter" data-filter="free">✓ Chỉ rảnh</button>
       </div>
 

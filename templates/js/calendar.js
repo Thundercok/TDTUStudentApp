@@ -7,8 +7,11 @@
  * Writes to:  window.allClasses, window.freeSlots, window.activeFilter
  */
 
-// Current active day filter: 'all' | 'free' | 2 | 3 | 4 | 5 | 6
+// Current active day filter: 'all' | 'free' | 2 | 3 | 4 | 5 | 6 | 7
 let activeFilter = 'all';
+
+// All weekdays including Saturday
+const ALL_DAYS = [2, 3, 4, 5, 6, 7];
 
 
 /* ════════════════════════════════════════════════════════════
@@ -26,7 +29,6 @@ async function merge() {
   }
 
   try {
-    // Try server-side merge first
     const res = await fetch('/api/merge-schedules', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -41,12 +43,10 @@ async function merge() {
     }
   } catch {
     // ── Client-side fallback ────────────────────────────────
-    // Flatten all classes from all visible members
     allClasses = visible.flatMap(m => m.classes);
 
-    // Build a busy-count map: busy[day][tiet] = number of members busy
     const busy = {};
-    for (let d = 2; d <= 6; d++) {
+    for (const d of ALL_DAYS) {
       busy[d] = {};
       for (let t = 1; t <= 12; t++) busy[d][t] = 0;
     }
@@ -58,9 +58,8 @@ async function merge() {
       })
     );
 
-    // Any slot where busy count is 0 → everyone is free
     freeSlots = [];
-    for (let d = 2; d <= 6; d++) {
+    for (const d of ALL_DAYS) {
       for (let t = 1; t <= 12; t++) {
         if (busy[d][t] === 0) {
           freeSlots.push({ day: d, tiet: t, time: TIME_TABLE[t] });
@@ -77,15 +76,12 @@ async function merge() {
    FILTER
    ════════════════════════════════════════════════════════════ */
 
-// Called by filter strip buttons (via data-filter attribute, wired in main.js)
 function applyFilter(value, clickedBtn) {
   activeFilter = value;
 
-  // Update filter button states
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
   if (clickedBtn) clickedBtn.classList.add('on');
 
-  // Sync mobile bottom nav highlight
   document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('on'));
   const navTarget = value === 'free' ? 'navFree' : 'navCal';
   document.getElementById(navTarget)?.classList.add('on');
@@ -102,21 +98,17 @@ function renderCalendar() {
   const visible = members.filter(m => !m.hidden && m.status === 'ok');
   const hasData = visible.length > 0;
 
-  // Show/hide meta row and filter strip
-  document.getElementById('metaRow').style.display = hasData ? 'flex'  : 'none';
-  document.getElementById('fs').style.display      = hasData ? 'flex'  : 'none';
+  document.getElementById('metaRow').style.display = hasData ? 'flex' : 'none';
+  document.getElementById('fs').style.display      = hasData ? 'flex' : 'none';
 
-  // Update stat counters
   if (hasData) {
     document.getElementById('sM').textContent = visible.length;
     document.getElementById('sC').textContent = allClasses.length;
     document.getElementById('sF').textContent = freeSlots.length;
   }
 
-  // Update free-slots panel in the sidebar
   renderFreePanel(visible.length);
 
-  // Empty state
   if (!hasData) {
     document.getElementById('cw').innerHTML = `
       <div class="empty-state">
@@ -129,58 +121,71 @@ function renderCalendar() {
     return;
   }
 
-  // Build grid
-  const days    = (activeFilter === 'all' || activeFilter === 'free')
-    ? [2, 3, 4, 5, 6]
-    : [parseInt(activeFilter)];
+  // Which days to show — auto-hide Saturday if no one has classes on it
+  let days;
+  if (activeFilter === 'all' || activeFilter === 'free') {
+    const hasSat = allClasses.some(c => c.day === 7);
+    days = hasSat ? ALL_DAYS : [2, 3, 4, 5, 6];
+  } else {
+    days = [parseInt(activeFilter)];
+  }
+
   const cols     = days.length;
-  const timeColW = cols === 1 ? '44px' : '50px';
+  const timeColW = cols === 1 ? '52px' : cols <= 3 ? '52px' : '48px';
+  const CELL_H   = 52; // px per tiết
 
   let html = `
     <div class="cal">
       <div class="cal-grid"
            style="grid-template-columns: ${timeColW} repeat(${cols}, 1fr)">`;
 
-  // ── Header row ──────────────────────────────────────────────
+  // ── Header row ─────────────────────────────────────────────
   html += `<div class="cal-corner"></div>`;
   days.forEach(d => {
-    const hasFree   = freeSlots.some(s => s.day === d);
-    const label     = cols > 3 ? DAY_NAMES[d - 2].s : DAY_NAMES[d - 2].n;
-    const freeBadge = hasFree ? `<div class="day-free-badge">● rảnh</div>` : '';
+    const hasFree = freeSlots.some(s => s.day === d);
+    // Use index: day 2 → index 0, day 7 → index 5
+    const dayIdx  = d - 2;
+    const label   = cols > 4 ? DAY_NAMES[dayIdx].s : DAY_NAMES[dayIdx].n;
+    const isSat   = d === 7;
     html += `
-      <div class="cal-day-header">
+      <div class="cal-day-header${isSat ? ' is-sat' : ''}">
         <div class="day-name">${label}</div>
-        ${freeBadge}
+        ${hasFree ? `<div class="day-free-badge">rảnh</div>` : ''}
       </div>`;
   });
 
   // ── Time rows ───────────────────────────────────────────────
   for (let t = 1; t <= 12; t++) {
-    html += `<div class="time-cell">${TIME_TABLE[t]}</div>`;
+    html += `
+      <div class="time-cell">
+        <span class="time-tiet">Tiết ${t}</span>
+        <span class="time-clock">${TIME_TABLE[t]}</span>
+      </div>`;
 
     days.forEach(d => {
       const isFree   = freeSlots.some(s => s.day === d && s.tiet === t);
       const showFree = isFree && (activeFilter === 'all' || activeFilter === 'free');
-      const cellCls  = showFree ? ' free-slot' : '';
+      const isSat    = d === 7;
+      let cellCls    = '';
+      if (showFree) cellCls += ' free-slot';
+      if (isSat)    cellCls += ' sat-col';
 
       html += `<div class="cal-cell${cellCls}" data-d="${d}" data-t="${t}">`;
 
-      // Blocks that start on this tiet
       const startsHere = allClasses.filter(c => c.day === d && c.tiet_start === t);
-      const colW       = startsHere.length ? 100 / startsHere.length : 100;
+      const colW = startsHere.length ? 100 / startsHere.length : 100;
 
       startsHere.forEach((cls, bi) => {
         const mem = members.find(m => m.name === cls.member);
         if (!mem) return;
 
-        const blockH   = (cls.tiet_end - cls.tiet_start + 1) * 48 - 5;
-        const leftPct  = (bi * colW).toFixed(1);
-        const widthPct = (colW - 0.5).toFixed(1);
+        const blockH    = (cls.tiet_end - cls.tiet_start + 1) * CELL_H - 4;
+        const leftPct   = (bi * colW).toFixed(1);
+        const widthPct  = (colW - 0.4).toFixed(1);
         const timeStart = cls.time_start || TIME_TABLE[t];
-        const timeEnd   = cls.time_end   || '';
-        const room      = cls.room       || '';
+        const timeEnd   = cls.time_end   || TIME_TABLE[cls.tiet_end] || '';
+        const room      = cls.room || '';
 
-        // Tooltip attributes — escape all user-sourced strings
         const tipAttrs = `
           onmouseenter="showTip(event,
             '${esc(cls.subject)}',
@@ -190,19 +195,17 @@ function renderCalendar() {
             '${esc(timeEnd)}')"
           onmouseleave="document.getElementById('tip').classList.remove('on')"`;
 
+        // Solid-colour block: member's c is the background, white text on top
         html += `
           <div class="blk"
                style="height:     ${blockH}px;
                       left:       ${leftPct}%;
                       width:      ${widthPct}%;
-                      background: ${mem.bg};
-                      border-left-color: ${mem.c};
-                      color:      ${mem.c};"
+                      background: ${mem.c};
+                      --blk-color: ${mem.c};"
                ${tipAttrs}>
             <div class="blk-name">${esc(cls.subject)}</div>
-            <div class="blk-sub">
-              ${esc(mem.name)}${room ? ' · ' + esc(room) : ''}
-            </div>
+            <div class="blk-sub">${esc(mem.name)}${room ? ' · ' + esc(room) : ''}</div>
           </div>`;
       });
 
@@ -210,13 +213,13 @@ function renderCalendar() {
     });
   }
 
-  html += `</div></div>`; // .cal-grid  .cal
+  html += `</div></div>`; // .cal-grid .cal
   document.getElementById('cw').innerHTML = html;
 }
 
 
 /* ════════════════════════════════════════════════════════════
-   FREE PANEL  (sidebar chip list)
+   FREE PANEL
    ════════════════════════════════════════════════════════════ */
 
 function renderFreePanel(memberCount) {

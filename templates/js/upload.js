@@ -24,22 +24,29 @@ function initUploadTabs() {
     if (!tab) return;
     switchTab(tab.dataset.tab);
   });
+
+  // Enforce initial state — don't rely solely on HTML classes
+  switchTab('image');
 }
 
 function switchTab(tab) {
   activeTab = tab;
 
-  // Update tab button states
-  document.querySelectorAll('.utab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  // Update tab button highlights
+  document.querySelectorAll('.utab').forEach(b =>
+    b.classList.toggle('on', b.dataset.tab === tab)
+  );
 
-  // Show/hide panes
-  document.querySelectorAll('.upload-pane').forEach(p => {
-    p.classList.toggle('hidden', p.id !== `pane-${tab}`);
+  // Show/hide panes via style.display — avoids all CSS specificity issues
+  ['image', 'manual', 'csv', 'text'].forEach(id => {
+    const pane = document.getElementById(`pane-${id}`);
+    if (pane) pane.style.display = (id === tab) ? 'block' : 'none';
   });
 
-  // Reset any pending state from other tabs
+  // Reset pending file state when switching away from image tab
   pendingFile = null;
-  document.getElementById('pw').style.display = 'none';
+  const pw = document.getElementById('pw');
+  if (pw) pw.style.display = 'none';
 
   checkAddReady();
 }

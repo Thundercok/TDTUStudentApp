@@ -5,21 +5,20 @@
  */
 
 // ── Member colour palette ──────────────────────────────────────
-// Each member is assigned the next colour in this list (wraps around).
-// Format: { c: text/border colour, bg: background colour }
+// c = solid block background (white text will sit on top)
+// bg = light tint used only for avatar backgrounds in the member list
 const PAL = [
-  { c: '#1a5c3e', bg: '#e8f5ee' },  // forest green
-  { c: '#2d5a8a', bg: '#e8f0f8' },  // steel blue
-  { c: '#7a3575', bg: '#f5e8f4' },  // plum
-  { c: '#9b6200', bg: '#fdf3e2' },  // amber
-  { c: '#4a3d8a', bg: '#edeaf8' },  // indigo
-  { c: '#9b2335', bg: '#fdeef0' },  // rose
-  { c: '#1e7070', bg: '#e8f6f6' },  // teal
-  { c: '#5c6e00', bg: '#f3f6e0' },  // olive
+  { c: '#1a6e3c', bg: '#c8ecd8' },  // emerald
+  { c: '#1e4f9c', bg: '#c5d9f5' },  // cobalt
+  { c: '#8c2080', bg: '#f0c8ee' },  // violet
+  { c: '#b85c00', bg: '#fad9a8' },  // burnt orange
+  { c: '#1a7070', bg: '#b8e8e8' },  // teal
+  { c: '#9c1a35', bg: '#f5c8d4' },  // crimson
+  { c: '#4a3daa', bg: '#d0caf5' },  // indigo
+  { c: '#5c7000', bg: '#ddf0a0' },  // olive
 ];
 
 // ── Tiết → clock time ─────────────────────────────────────────
-// Maps period numbers (1–12) to their start times.
 const TIME_TABLE = {
   1:  '07:00',
   2:  '07:50',
@@ -36,19 +35,17 @@ const TIME_TABLE = {
 };
 
 // ── Day metadata ──────────────────────────────────────────────
-// n = full label, s = short label for cramped views
+// Includes Saturday (day 7)
 const DAY_NAMES = [
   { n: 'Thứ 2', s: 'T2' },
   { n: 'Thứ 3', s: 'T3' },
   { n: 'Thứ 4', s: 'T4' },
   { n: 'Thứ 5', s: 'T5' },
   { n: 'Thứ 6', s: 'T6' },
+  { n: 'Thứ 7', s: 'T7' },
 ];
 
-// Maps day number → short label (used in free-slot chips)
-const DAY_SHORT = { 2: 'T2', 3: 'T3', 4: 'T4', 5: 'T5', 6: 'T6' };
+const DAY_SHORT = { 2: 'T2', 3: 'T3', 4: 'T4', 5: 'T5', 6: 'T6', 7: 'T7' };
 
 // ── localStorage key ───────────────────────────────────────────
-// Bump this string if the saved data schema ever changes
-// so old stored data is ignored instead of causing errors.
 const LS_KEY = 'lichclb_v1';
