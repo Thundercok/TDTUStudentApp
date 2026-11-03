@@ -1,1 +1,16 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
 .env
+build/
+dist/
+*.dmg
+*.log
+offline_agent/bin/
+
+# Restored by tools/prepare_translation_models.py and tools/prepare_embedding_model.py.
+offline_agent/assets/translation/*/model/
+offline_agent/assets/translation/*/sentencepiece.model
+offline_agent/assets/embedding/models--*/
